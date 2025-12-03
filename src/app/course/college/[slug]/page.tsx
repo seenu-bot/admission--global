@@ -67,7 +67,6 @@ type CollegeRecord = {
   };
   fee?: string | number;
   totalCourses?: string | number;
-  sourceCollection?: string;
 };
 
 function gatherStrings(input: any): string[] {
@@ -436,28 +435,28 @@ async function getEntryByCompositeId(collectionName: string, identifier: string)
   }
 }
 
-async function resolveCollege(identifier: string) {
+async function resolveCollege(identifier: string): Promise<CollegeRecord | null> {
   const collections = ["colleges", "courses"];
   
   // 1. Direct slug lookup (preferred)
   for (const collectionName of collections) {
     const bySlug = await getDocBySlug(collectionName, identifier);
-    if (bySlug) return bySlug;
+    if (bySlug) return bySlug as CollegeRecord;
   }
 
   // 2. Generated slug lookup for docs or nested entries without explicit slug field
   for (const collectionName of collections) {
     const byGenerated = await getDocByGeneratedSlug(collectionName, identifier);
-    if (byGenerated) return byGenerated;
+    if (byGenerated) return byGenerated as CollegeRecord;
   }
 
   // 3. Fallback to ID lookup (handles older ID links)
   for (const collectionName of collections) {
     const byId = await getDocById(collectionName, identifier);
-    if (byId) return byId;
+    if (byId) return byId as CollegeRecord;
 
     const byComposite = await getEntryByCompositeId(collectionName, identifier);
-    if (byComposite) return byComposite;
+    if (byComposite) return byComposite as CollegeRecord;
   }
 
   return null;
