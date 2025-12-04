@@ -12,6 +12,7 @@ export const navigationLinks = [
   { href: "/counselling", label: "Counselling" },
   { href: "/internships", label: "Internships" },
   { href: "/jobs", label: "Jobs" },
+  { href: "/colleges", label: "Colleges" },
 ];
 
 export const socialLinks = [

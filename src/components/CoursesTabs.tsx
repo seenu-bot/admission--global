@@ -3,6 +3,40 @@
 import { useState, useEffect, useRef } from "react";
 import { collection, getDocs, DocumentData } from "firebase/firestore";
 import { db } from "@/firebase/firebase";
+import { slugify } from "@/lib/slugify";
+
+// Helper to derive short course labels like "MBBS", "B.Tech", "MBA"
+function getCourseShortForm(name?: string): string {
+  if (!name) return "";
+  const n = name.trim();
+
+  const patterns: { pattern: RegExp; short: string }[] = [
+    { pattern: /\bMBBS\b|Bachelor of Medicine.*Bachelor of Surgery/i, short: "MBBS" },
+    { pattern: /\bB\.?Tech\b|B\.?E\.?\b|Bachelor of Technology|Bachelor of Engineering/i, short: "B.Tech" },
+    { pattern: /\bM\.?Tech\b|M\.?E\.?\b|Master of Technology|Master of Engineering/i, short: "M.Tech" },
+    { pattern: /\bMBA\b|Master of Business Administration/i, short: "MBA" },
+    { pattern: /\bBBA\b|Bachelor of Business Administration/i, short: "BBA" },
+    { pattern: /\bB\.?Sc\b|Bachelor of Science/i, short: "B.Sc" },
+    { pattern: /\bM\.?Sc\b|Master of Science/i, short: "M.Sc" },
+    { pattern: /\bB\.?Com\b|Bachelor of Commerce/i, short: "B.Com" },
+    { pattern: /\bM\.?Com\b|Master of Commerce/i, short: "M.Com" },
+    { pattern: /\bBCA\b|Bachelor of Computer Applications?/i, short: "BCA" },
+    { pattern: /\bMCA\b|Master of Computer Applications?/i, short: "MCA" },
+    { pattern: /\bBDS\b|Bachelor of Dental Surgery/i, short: "BDS" },
+  ];
+
+  for (const { pattern, short } of patterns) {
+    if (pattern.test(n)) return short;
+  }
+
+  // Fallback: if a clear abbreviation exists in caps (e.g., "LLB")
+  const abbrev = n.match(/\b([A-Z]{2,5})\b/);
+  if (abbrev) return abbrev[1];
+
+  // If still long, trim to first 18 chars with ellipsis
+  if (n.length > 22) return n.slice(0, 18) + "...";
+  return n;
+}
 
 // ✅ Define the shape of each course item
 interface CourseItem {
@@ -208,12 +242,17 @@ export default function CoursesTabs() {
                 style={{ overflowX: "auto", scrollBehavior: "smooth", scrollbarWidth: "thin" }}
               >
               {courses.length > 0 ? (
-                courses.map((course: any) => (
-                  <div key={course.id} className="explore_course_div">
+              courses.map((course: any) => {
+                const baseName = course.name || course.courseName || course.title || course.id;
+                const courseSlug = course.slug || slugify(baseName || "");
+                const coursePath = courseSlug ? `/course/${courseSlug}` : `/course/${course.id}`;
+                const label = getCourseShortForm(baseName);
+                return (
+                <div key={course.id} className="explore_course_div">
                     <p className="course_logo"></p>
 
-                    <a href={`/course/${course.id}`} className="course_name">
-                      {course.name}
+                    <a href={coursePath} className="course_name">
+                      {label || course.name}
                     </a>
 
                     <div className="course_data_div">
@@ -234,11 +273,12 @@ export default function CoursesTabs() {
                       </p>
                     </div>
 
-                    <a href={`/course/${course.id}`} className="view_link">
+                    <a href={coursePath} className="view_link">
                       View Course Overview &gt;
                     </a>
                   </div>
-                ))
+                );
+              })
               ) : (
                 <p className="text-gray-500 text-center">No courses available.</p>
                 )}

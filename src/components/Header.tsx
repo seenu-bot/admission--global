@@ -1567,9 +1567,9 @@ export default function Header() {
                                               {`M.Tech Colleges in ${location.name}`}
                                             </Link>
                                           ))}
-                                          <Link href={`/course/mtech`} className="view_more_link">
-                                            View more ›
-                                          </Link>
+                                            <Link href={`/course/mtech`} className="view_more_link">
+                                              View more ›
+                                            </Link>
                                         </div>
                                       );
                                     }
@@ -1680,20 +1680,20 @@ export default function Header() {
                                           {`M.Tech Colleges in ${location.name}`}
                                         </Link>
                                       ))}
-                                      <Link href={`/course/mtech`} className="view_more_link">
-                                        View more ›
-                                      </Link>
+                                        <Link href={`/course/mtech`} className="view_more_link">
+                                          View more ›
+                                        </Link>
                                     </div>
                                   );
                                 }
 
                                 return (
-                                  <div key={secIdx} className="type_of_navigation_wrap">
-                                    <p>{section.title}</p>
-                                    {section.links.map((link: any, linkIdx: any) => (
-                                      <Link key={linkIdx} href={normalizeUrl(link.url)}>{link.label}</Link>
-                                    ))}
-                                  </div>
+                                <div key={secIdx} className="type_of_navigation_wrap">
+                                  <p>{section.title}</p>
+                                  {section.links.map((link: any, linkIdx: any) => (
+                                    <Link key={linkIdx} href={normalizeUrl(link.url)}>{link.label}</Link>
+                                  ))}
+                                </div>
                                 );
                               })}
                         </>

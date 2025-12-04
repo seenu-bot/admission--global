@@ -4239,30 +4239,44 @@ form .select_searchbox .search_list li {
     gap: 0;
     border-radius: 0;
     border: 1px solid rgba(51, 51, 51, .11);
-    width: 280px;
-    min-width: 280px;
+    width: 250px;
+    min-width: 250px;
     background: white;
     flex-shrink: 0;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 #HomePageSection #upcomingExamWrapper .upcomingExamWrapperClass .upcomingExamWrapperDiv.exam_card_new {
-    height: auto;
-    max-height: none;
-    overflow: visible;
+    height: 260px;
+    max-height: 260px;
+    overflow: hidden;
     align-items: flex-start;
     text-align: left;
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+}
+
+/* Header Container - Logo and Title Side by Side */
+#HomePageSection #upcomingExamWrapper .upcomingExamWrapperClass .upcomingExamWrapperDiv.exam_card_new .exam_card_header {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 0 0 8px 0;
+    width: 100%;
 }
 
 /* Logo */
 #HomePageSection #upcomingExamWrapper .upcomingExamWrapperClass .upcomingExamWrapperDiv.exam_card_new .exam_card_logo {
-    margin: 16px 16px 12px 16px;
+    margin: 0;
     align-self: flex-start;
+    flex-shrink: 0;
 }
 
 #HomePageSection #upcomingExamWrapper .upcomingExamWrapperClass .upcomingExamWrapperDiv.exam_card_new .exam_card_logo img {
-    width: 80px !important;
-    height: 80px !important;
+    width: 56px !important;
+    height: 56px !important;
     border-radius: 4px !important;
     object-fit: contain;
     background: #f3f4f6;
@@ -4270,83 +4284,107 @@ form .select_searchbox .search_list li {
 }
 
 #HomePageSection #upcomingExamWrapper .upcomingExamWrapperClass .upcomingExamWrapperDiv.exam_card_new .exam_card_logo_placeholder {
-    width: 80px;
-    height: 80px;
+    width: 56px;
+    height: 56px;
     border-radius: 4px;
     background: #f3f4f6;
 }
 
 /* Title and Subtitle */
 #HomePageSection #upcomingExamWrapper .upcomingExamWrapperClass .upcomingExamWrapperDiv.exam_card_new .exam_card_title {
-    margin: 0 16px 12px 16px;
-    width: calc(100% - 32px);
+    margin: 0;
+    width: auto;
+    flex: 1;
+    min-width: 0;
 }
 
 #HomePageSection #upcomingExamWrapper .upcomingExamWrapperClass .upcomingExamWrapperDiv.exam_card_new .exam_card_title h3 {
-    font-size: 18px !important;
+    font-size: 14px !important;
     font-weight: 700 !important;
     color: #1f2937 !important;
     margin: 0 0 4px 0 !important;
     line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 #HomePageSection #upcomingExamWrapper .upcomingExamWrapperClass .upcomingExamWrapperDiv.exam_card_new .exam_card_subtitle {
-    font-size: 14px !important;
+    font-size: 12px !important;
     font-weight: 400 !important;
     color: #6b7280 !important;
     margin: 0 !important;
     line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Separator */
 #HomePageSection #upcomingExamWrapper .upcomingExamWrapperClass .upcomingExamWrapperDiv.exam_card_new .exam_card_separator {
     height: 1px;
     background: #e5e7eb;
-    margin: 0 16px 12px 16px;
-    width: calc(100% - 32px);
+    margin: 0 0 8px 0;
+    width: 100%;
 }
 
 /* Course */
 #HomePageSection #upcomingExamWrapper .upcomingExamWrapperClass .upcomingExamWrapperDiv.exam_card_new .exam_card_course {
-    margin: 0 16px 12px 16px;
-    width: calc(100% - 32px);
+    margin: 0 0 8px 0;
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 4px;
+    flex-shrink: 0;
 }
 
 /* Exam Date */
 #HomePageSection #upcomingExamWrapper .upcomingExamWrapperClass .upcomingExamWrapperDiv.exam_card_new .exam_card_date {
-    margin: 0 16px 16px 16px;
-    width: calc(100% - 32px);
+    margin: 0 0 0 0;
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 4px;
+    flex-shrink: 0;
 }
 
 /* Labels and Values */
 #HomePageSection #upcomingExamWrapper .upcomingExamWrapperClass .upcomingExamWrapperDiv.exam_card_new .exam_card_label {
-    font-size: 12px !important;
+    font-size: 11px !important;
     color: #6b7280 !important;
     font-weight: 400 !important;
     line-height: 1.4;
 }
 
 #HomePageSection #upcomingExamWrapper .upcomingExamWrapperClass .upcomingExamWrapperDiv.exam_card_new .exam_card_value {
-    font-size: 14px !important;
+    font-size: 12px !important;
     color: #1f2937 !important;
     font-weight: 600 !important;
     line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
-/* Buttons - Stacked Vertically */
+/* Buttons - Fixed at Bottom */
 #HomePageSection #upcomingExamWrapper .upcomingExamWrapperClass .upcomingExamWrapperDiv.exam_card_new .exam_card_buttons {
     margin-top: auto;
     width: 100%;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 8px;
-    padding: 0 16px 16px 16px;
+    padding: 12px 0 0 0;
+    flex-shrink: 0;
 }
 
 #HomePageSection #upcomingExamWrapper .upcomingExamWrapperClass .upcomingExamWrapperDiv img {
@@ -4358,7 +4396,7 @@ form .select_searchbox .search_list li {
 }
 
 #HomePageSection #upcomingExamWrapper .upcomingExamWrapperClass .upcomingExamWrapperDiv p {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     color: #2d2d2d;
     margin-bottom: 0;
@@ -4368,7 +4406,7 @@ form .select_searchbox .search_list li {
 }
 
 #HomePageSection #upcomingExamWrapper .upcomingExamWrapperClass .upcomingExamWrapperDiv span {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 400;
     color: #2d2d2dcc;
     flex-shrink: 0;
@@ -4528,20 +4566,38 @@ form .select_searchbox .search_list li {
 
 /* Exam Card New Style for Listing Pages */
 .listing_data_card.exam_card_new {
-    padding: 0;
+    height: 260px;
+    max-height: 260px;
+    overflow: hidden;
+    padding: 12px;
     gap: 0;
     border-radius: 0;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+}
+
+/* Header Container - Logo and Title Side by Side */
+.listing_data_card.exam_card_new .exam_card_header {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 0 0 8px 0;
+    width: 100%;
 }
 
 .listing_data_card.exam_card_new .exam_card_logo {
-    margin: 16px 16px 12px 16px;
+    margin: 0;
     align-self: flex-start;
+    flex-shrink: 0;
 }
 
 .listing_data_card.exam_card_new .exam_card_logo img {
-    width: 80px !important;
-    height: 80px !important;
+    width: 56px !important;
+    height: 56px !important;
     border-radius: 4px !important;
     object-fit: contain;
     background: #f3f4f6;
@@ -4549,37 +4605,43 @@ form .select_searchbox .search_list li {
 }
 
 .listing_data_card.exam_card_new .exam_card_logo_placeholder {
-    width: 80px;
-    height: 80px;
+    width: 56px;
+    height: 56px;
     border-radius: 4px;
     background: #f3f4f6;
 }
 
 .listing_data_card.exam_card_new .exam_card_title {
-    margin: 0 16px 12px 16px;
-    width: calc(100% - 32px);
+    margin: 0;
+    width: auto;
+    flex: 1;
+    min-width: 0;
 }
 
 .listing_data_card.exam_card_new .exam_card_title h3 {
-    font-size: 16px !important;
+    font-size: 14px !important;
     font-weight: 700 !important;
     color: #1f2937 !important;
     margin: 0 0 4px 0 !important;
-    line-height: 1.25;
+    line-height: 1.3;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .listing_data_card.exam_card_new .exam_card_subtitle {
-    font-size: 14px !important;
+    font-size: 12px !important;
     font-weight: 400 !important;
     color: #6b7280 !important;
     margin: 0 !important;
-    line-height: 1.3;
-    white-space: nowrap;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -4587,52 +4649,57 @@ form .select_searchbox .search_list li {
 .listing_data_card.exam_card_new .exam_card_separator {
     height: 1px;
     background: #e5e7eb;
-    margin: 0 16px 12px 16px;
-    width: calc(100% - 32px);
+    margin: 0 0 8px 0;
+    width: 100%;
 }
 
 .listing_data_card.exam_card_new .exam_card_course {
-    margin: 0 16px 12px 16px;
-    width: calc(100% - 32px);
+    margin: 0 0 8px 0;
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 4px;
+    flex-shrink: 0;
 }
 
 .listing_data_card.exam_card_new .exam_card_date {
-    margin: 0 16px 16px 16px;
-    width: calc(100% - 32px);
+    margin: 0 0 0 0;
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 4px;
+    flex-shrink: 0;
 }
 
 .listing_data_card.exam_card_new .exam_card_label {
-    font-size: 12px !important;
+    font-size: 11px !important;
     color: #6b7280 !important;
     font-weight: 400 !important;
     line-height: 1.4;
 }
 
 .listing_data_card.exam_card_new .exam_card_value {
-    font-size: 14px !important;
+    font-size: 12px !important;
     color: #1f2937 !important;
     font-weight: 600 !important;
-    line-height: 1.35;
+    line-height: 1.4;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .listing_data_card.exam_card_new .exam_card_buttons {
     margin-top: auto;
     width: 100%;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 8px;
-    padding: 0 16px 16px 16px;
+    padding: 12px 0 0 0;
+    flex-shrink: 0;
 }
 
 .listing_data_card .logo_and_info {
@@ -4784,16 +4851,17 @@ form .select_searchbox .search_list li {
 }
 
 .exam_btn_get_updates {
-    width: 100%;
-    padding: 10px 16px;
+    flex: 1;
+    padding: 8px 12px;
     border: 1px solid #a03318;
     background: #fff;
     color: #a03318;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 600;
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.2s ease;
+    white-space: nowrap;
 }
 
 .exam_btn_get_updates:hover {
@@ -4803,18 +4871,19 @@ form .select_searchbox .search_list li {
 }
 
 .exam_btn_more_details {
-    width: 100%;
-    padding: 10px 16px;
+    flex: 1;
+    padding: 8px 12px;
     border: 1px solid #a03318;
     background: #a03318;
     color: #fff;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 600;
     border-radius: 4px;
     text-align: center;
     text-decoration: none;
     transition: all 0.2s ease;
     display: inline-block;
+    white-space: nowrap;
 }
 
 .exam_btn_more_details:hover {

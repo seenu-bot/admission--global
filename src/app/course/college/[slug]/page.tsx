@@ -2,6 +2,7 @@
 
 import { use } from "react";
 import { useEffect, useState } from "react";
+import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,11 +14,14 @@ import {
   where,
   limit,
   getDocs,
+  addDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 import { db } from "@/firebase/firebase";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { getCollegeSlug } from "@/lib/slugify";
+import { getCollegeSlug, slugify } from "@/lib/slugify";
+import { buildProgramsFromCollege, groupProgramsByCategory } from "@/lib/programUtils";
 
 const DEFAULT_IMAGE = "/build/assets/t-1709039660-chitkara-university-rajpura.jpeg";
 
@@ -472,6 +476,86 @@ export default function CourseCollegePage({
   const [college, setCollege] = useState<CollegeRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [redirecting, setRedirecting] = useState(false);
+  const [expandedProgramGroups, setExpandedProgramGroups] = useState<Record<string, boolean>>({});
+  const [registerModal, setRegisterModal] = useState<{
+    open: boolean;
+    action: "admission" | "brochure" | "eligibility";
+    program?: string;
+  }>({ open: false, action: "admission" });
+  const [registerForm, setRegisterForm] = useState({
+    fullName: "",
+    phone: "",
+    email: "",
+    currentCourse: "",
+  });
+  const [registerStatus, setRegisterStatus] = useState("");
+
+  const toggleProgramGroup = (category: string) => {
+    setExpandedProgramGroups((prev) => ({
+      ...prev,
+      [category]: !prev[category],
+    }));
+  };
+
+  const openRegisterModal = (
+    action: "admission" | "brochure" | "eligibility",
+    program?: string
+  ) => {
+    setRegisterModal({ open: true, action, program });
+    setRegisterForm((prev) => ({
+      ...prev,
+      currentCourse: program || prev.currentCourse,
+    }));
+    setRegisterStatus("");
+  };
+
+  const closeRegisterModal = () => {
+    setRegisterModal({ open: false, action: "admission" });
+    setRegisterStatus("");
+  };
+
+  const handleRegisterInput = (field: keyof typeof registerForm, value: string) => {
+    setRegisterForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleRegisterSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    try {
+      const payload = {
+        fullName: registerForm.fullName.trim(),
+        phone: registerForm.phone.trim(),
+        email: registerForm.email.trim(),
+        currentCourse: registerForm.currentCourse.trim(),
+        collegeId: college?.id || null,
+        collegeName:
+          collegeName ||
+          college?.name ||
+          college?.collegeName ||
+          college?.instituteName ||
+          college?.universityName ||
+          "",
+        city: college?.city || "",
+        state: college?.state || "",
+        country: college?.country || "",
+        action: registerModal.action,
+        program: registerModal.program || "",
+        source: "course_college_page",
+        createdAt: serverTimestamp(),
+      };
+
+      await addDoc(collection(db, "admissions"), payload);
+      setRegisterStatus("Thanks! Our counsellor will contact you shortly.");
+      setTimeout(() => {
+        closeRegisterModal();
+      }, 1800);
+    } catch (error) {
+      console.error("Error saving admission data:", error);
+      setRegisterStatus("Something went wrong. Please try again.");
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -619,6 +703,9 @@ export default function CourseCollegePage({
   const contactPhone = college.phone || college.contactNumber || college.contact?.phone;
   const contactEmail = college.email || college.contact?.email;
   const collegeSlug = getCollegeSlug(college) || college.id;
+  const programEntries = buildProgramsFromCollege(college);
+  const programGroups = groupProgramsByCategory(programEntries);
+  const primaryProgram = programEntries[0];
   
   // Additional fields from Firestore
   const galleryImages = Array.isArray((college as any).galleryImages) 
@@ -689,7 +776,7 @@ export default function CourseCollegePage({
           / <span>{collegeName}</span>
         </nav>
 
-        <section className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
+        <section id="info" className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
           <div className="grid md:grid-cols-[2fr_1fr]">
             <div className="p-6 md:p-10">
               <div className="flex flex-col lg:flex-row gap-6">
@@ -764,7 +851,7 @@ export default function CourseCollegePage({
                 </div>
               </div>
             </div>
-            <aside className="bg-gray-50 border-l border-gray-100 p-6 space-y-4">
+            <aside id="faculty" className="bg-gray-50 border-l border-gray-100 p-6 space-y-4">
               <h2 className="text-lg font-semibold text-gray-900">Quick Information</h2>
               <div className="space-y-3">
                 {quickFacts.map((fact) => (
@@ -780,12 +867,170 @@ export default function CourseCollegePage({
           </div>
         </section>
 
-        <section className="grid lg:grid-cols-3 gap-6">
+        {/* Section Tabs (Info / Courses & Fees / Cutoff / Admissions / Placements / Faculty / Gallery) */}
+        <div className="bg-gray-50 border-b border-gray-200">
+          <div className="flex gap-4 overflow-x-auto text-sm font-semibold text-gray-600">
+            {[
+              { id: "info", label: "Info" },
+              { id: "courses-fees", label: "Courses & Fees" },
+              { id: "cutoff", label: "Cutoff" },
+              { id: "admissions", label: "Admissions 2025" },
+              { id: "placements", label: "Placements" },
+              { id: "faculty", label: "Faculty" },
+              { id: "gallery", label: "Gallery" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => {
+                  const el = document.getElementById(tab.id);
+                  if (el) {
+                    el.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }
+                }}
+                className="px-3 py-2 border-b-2 border-transparent hover:border-red-700 hover:text-red-700 whitespace-nowrap"
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <section id="courses-fees" className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             {description && (
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">Overview</h3>
                 <p className="text-gray-600 leading-relaxed">{description}</p>
+              </div>
+            )}
+
+            {programEntries.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <p className="text-sm text-gray-500">{programEntries.length} Programs • {collegeName}</p>
+                    <h3 className="text-2xl font-semibold text-gray-900">Courses & Fees</h3>
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      onClick={() => openRegisterModal("eligibility", primaryProgram?.name)}
+                      className="px-5 py-2 rounded-full border border-red-700 text-red-700 font-semibold hover:bg-red-50 transition"
+                    >
+                      Check Eligibility
+                    </button>
+                    <button
+                      onClick={() => openRegisterModal("brochure", primaryProgram?.name)}
+                      className="px-5 py-2 rounded-full bg-red-700 text-white font-semibold shadow hover:bg-red-800 transition"
+                    >
+                      Brochure
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  {programGroups.map((group) => {
+                    const categoryKey = group.category || "Programs";
+                    const expanded = expandedProgramGroups[categoryKey];
+                    const visiblePrograms = expanded ? group.programs : group.programs.slice(0, 4);
+                    return (
+                      <div key={categoryKey} className="rounded-2xl border border-gray-100 overflow-hidden">
+                        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between border-b border-gray-100 bg-gray-50 px-4 py-3">
+                          <div>
+                            <p className="text-xs uppercase tracking-wide text-gray-500">
+                              {group.programs.length} Programs
+                            </p>
+                            <h4 className="text-lg font-semibold text-gray-900">{categoryKey}</h4>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            <button
+                              onClick={() => openRegisterModal("eligibility", categoryKey)}
+                              className="px-4 py-2 text-sm rounded-full border border-gray-300 text-gray-700 hover:border-red-700 hover:text-red-700 transition"
+                            >
+                              Check Eligibility
+                            </button>
+                            <button
+                              onClick={() => openRegisterModal("brochure", categoryKey)}
+                              className="px-4 py-2 text-sm rounded-full bg-red-600 text-white font-semibold hover:bg-red-700 transition"
+                            >
+                              Brochure
+                            </button>
+                          </div>
+                        </div>
+                        <div className="divide-y divide-gray-100">
+                          {visiblePrograms.map((program) => {
+                            const isGenericLevel =
+                              program.name === "Under Graduate (UG)" ||
+                              program.name === "Post Graduate (PG)";
+                            const content = isGenericLevel ? (
+                              <span>{program.name}</span>
+                            ) : (
+                              <Link
+                                href={`/course/${slugify(program.name)}`}
+                                className="hover:text-red-700 hover:underline"
+                              >
+                                {program.name}
+                              </Link>
+                            );
+
+                            return (
+                              <div
+                                key={`${categoryKey}-${program.id}`}
+                                className="flex flex-col gap-4 px-4 py-4 md:flex-row md:items-center md:justify-between"
+                              >
+                                <div>
+                                  <p className="text-sm text-gray-500">
+                                    {program.duration || "2 Years"}{" "}
+                                    {program.level ? `• ${program.level}` : ""}
+                                  </p>
+                                  <h5 className="text-lg font-semibold text-gray-900">
+                                    {content}
+                                  </h5>
+                                  <div className="mt-2 flex flex-wrap gap-4 text-sm text-gray-600">
+                                    <span>
+                                      Total Fees:{" "}
+                                      <span className="font-semibold text-gray-900">
+                                        {program.totalFees || "—"}
+                                      </span>
+                                    </span>
+                                    <span>
+                                      Seats:{" "}
+                                      <span className="font-semibold text-gray-900">
+                                        {program.seats || "—"}
+                                      </span>
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="flex flex-wrap gap-3">
+                                  <button
+                                    onClick={() => openRegisterModal("admission", program.name)}
+                                    className="px-4 py-2 rounded-full bg-red-700 text-white font-semibold hover:bg-red-800 transition"
+                                  >
+                                    Admission 2025
+                                  </button>
+                                  <button
+                                    onClick={() => openRegisterModal("brochure", program.name)}
+                                    className="px-4 py-2 rounded-full border border-gray-300 text-gray-700 font-semibold hover:border-red-700 hover:text-red-700 transition"
+                                  >
+                                    View Brochure
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        {group.programs.length > 4 && (
+                          <button
+                            onClick={() => toggleProgramGroup(categoryKey)}
+                            className="w-full py-3 text-sm font-semibold text-red-700 bg-white hover:bg-red-50 transition"
+                          >
+                            {expanded ? "Show Less Programs" : "Show All Programs"}
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             )}
 
@@ -838,7 +1083,7 @@ export default function CourseCollegePage({
 
             {/* Admission Eligibility */}
             {admissionEligibility && (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+              <div id="admissions" className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">Admission Eligibility</h3>
                 <p className="text-gray-600 leading-relaxed">{admissionEligibility}</p>
               </div>
@@ -846,7 +1091,7 @@ export default function CourseCollegePage({
 
             {/* Cutoff */}
             {cutoff && (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+              <div id="cutoff" className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">Cutoff</h3>
                 <p className="text-gray-600 leading-relaxed">{cutoff}</p>
               </div>
@@ -874,7 +1119,7 @@ export default function CourseCollegePage({
 
             {/* Placements */}
             {placements && (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+              <div id="placements" className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">Placements</h3>
                 <p className="text-gray-600 leading-relaxed whitespace-pre-line">{placements}</p>
               </div>
@@ -923,7 +1168,7 @@ export default function CourseCollegePage({
 
             {/* Gallery */}
             {galleryImages.length > 0 && (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+              <div id="gallery" className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">Gallery</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {galleryImages.map((imageUrl: string, i: number) => {
@@ -1223,6 +1468,116 @@ export default function CourseCollegePage({
       </div>
 
       <Footer />
+      {registerModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+          <div className="relative w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
+            <button
+              onClick={closeRegisterModal}
+              className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
+              aria-label="Close registration form"
+            >
+              ×
+            </button>
+            <p className="text-xs font-semibold uppercase tracking-wide text-red-600">
+              {registerModal.action === "brochure"
+                ? "Register to Download Brochure"
+                : registerModal.action === "eligibility"
+                ? "Check Eligibility"
+                : "College Admission 2025"}
+            </p>
+            <h3 className="mt-1 text-2xl font-semibold text-gray-900">{collegeName}</h3>
+            <p className="text-sm text-gray-500">
+              {registerModal.program
+                ? `${registerModal.program} • Personalized guidance`
+                : "Guidance for navigating the admissions process with up-to-date tips."}
+            </p>
+            <form className="mt-5 space-y-4" onSubmit={handleRegisterSubmit}>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700" htmlFor="course-register-name">
+                  Full Name
+                </label>
+                <input
+                  id="course-register-name"
+                  type="text"
+                  value={registerForm.fullName}
+                  onChange={(event) => handleRegisterInput("fullName", event.target.value)}
+                  required
+                  className="w-full rounded-xl border border-gray-200 px-3 py-2 focus:border-red-600 focus:outline-none"
+                  placeholder="Enter your name"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700" htmlFor="course-register-phone">
+                  Mobile Number
+                </label>
+                <div className="flex rounded-xl border border-gray-200 focus-within:border-red-600">
+                  <span className="inline-flex items-center border-r border-gray-200 px-3 text-sm text-gray-500">
+                    +91
+                  </span>
+                  <input
+                    id="course-register-phone"
+                    type="tel"
+                    value={registerForm.phone}
+                    onChange={(event) => handleRegisterInput("phone", event.target.value)}
+                    required
+                    pattern="[0-9]{10}"
+                    className="flex-1 rounded-r-xl px-3 py-2 focus:outline-none"
+                    placeholder="Enter mobile number"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700" htmlFor="course-register-email">
+                  Email
+                </label>
+                <input
+                  id="course-register-email"
+                  type="email"
+                  value={registerForm.email}
+                  onChange={(event) => handleRegisterInput("email", event.target.value)}
+                  required
+                  className="w-full rounded-xl border border-gray-200 px-3 py-2 focus:border-red-600 focus:outline-none"
+                  placeholder="Enter your email"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700" htmlFor="course-register-current">
+                  Current Course
+                </label>
+                <input
+                  id="course-register-current"
+                  type="text"
+                  value={registerForm.currentCourse}
+                  onChange={(event) => handleRegisterInput("currentCourse", event.target.value)}
+                  className="w-full rounded-xl border border-gray-200 px-3 py-2 focus:border-red-600 focus:outline-none"
+                  placeholder="Eg. BBA / B.Tech"
+                />
+              </div>
+              {registerStatus && (
+                <div className="rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+                  {registerStatus}
+                </div>
+              )}
+              <button
+                type="submit"
+                className="w-full rounded-2xl bg-red-700 py-3 text-center text-white font-semibold shadow hover:bg-red-800 transition"
+              >
+                Register
+              </button>
+              <div className="text-center text-sm text-gray-500">OR</div>
+              <button
+                type="button"
+                className="w-full rounded-2xl border border-gray-200 py-3 text-sm font-semibold text-gray-700 hover:border-gray-400 transition"
+              >
+                Continue with Google
+              </button>
+              <p className="text-center text-xs text-gray-500">
+                By submitting, you accept our Terms, Privacy Policy and consent to SMS updates.
+              </p>
+            </form>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "@/firebase/firebase";
 
 interface CounsellingModalProps {
   isOpen: boolean;
@@ -15,10 +17,25 @@ export default function CounsellingModal({ isOpen, onClose, currentCourse = "BCA
     email: "",
   });
   const [selectedCourse, setSelectedCourse] = useState(currentCourse);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState("");
 
   useEffect(() => {
     setSelectedCourse(currentCourse);
   }, [currentCourse]);
+
+  // Reset form when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setFormData({
+        name: "",
+        mobile: "",
+        email: "",
+      });
+      setSubmitStatus("");
+      setIsSubmitting(false);
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen) {
@@ -64,16 +81,52 @@ export default function CounsellingModal({ isOpen, onClose, currentCourse = "BCA
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log("Form submitted:", formData);
-    // You can add API call here
+    setIsSubmitting(true);
+    setSubmitStatus("");
+
+    try {
+      const payload = {
+        fullName: formData.name.trim(),
+        phone: formData.mobile.trim(),
+        email: formData.email.trim(),
+        currentCourse: selectedCourse.trim(),
+        action: "counselling_registration",
+        source: "counselling_page",
+        createdAt: serverTimestamp(),
+      };
+
+      await addDoc(collection(db, "admissions"), payload);
+      
+      setSubmitStatus("Thanks! Our counsellor will contact you shortly.");
+      
+      // Reset form
+      setFormData({
+        name: "",
+        mobile: "",
+        email: "",
+      });
+      
+      // Close modal after 2 seconds
+      setTimeout(() => {
+        setSubmitStatus("");
+        onClose();
+      }, 2000);
+    } catch (error) {
+      console.error("Error saving counselling data:", error);
+      setSubmitStatus("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleGoogleSignIn = () => {
-    // Handle Google sign in
+  const handleGoogleSignIn = async () => {
+    // For now, we'll just log it. In a real implementation, you'd integrate with Google OAuth
+    // and then save the data after successful authentication
     console.log("Google sign in clicked");
+    // TODO: Implement Google OAuth integration
+    // After successful Google auth, save to Firestore with the same payload structure
   };
 
   if (!isOpen) return null;
@@ -258,13 +311,29 @@ export default function CounsellingModal({ isOpen, onClose, currentCourse = "BCA
                 </div>
               </div>
 
+              {/* Status Message */}
+              {submitStatus && (
+                <div className={`p-3 rounded-lg text-sm text-center ${
+                  submitStatus.includes("Thanks") 
+                    ? "bg-green-50 text-green-700" 
+                    : "bg-red-50 text-red-700"
+                }`}>
+                  {submitStatus}
+                </div>
+              )}
+
               {/* Register Button */}
               <button
                 type="submit"
-                className="w-full bg-[#8B4513] hover:bg-[#A0522D] text-white font-semibold py-3 rounded-lg transition-colors"
-                style={{ backgroundColor: '#8B4513' }}
+                disabled={isSubmitting}
+                className={`w-full text-white font-semibold py-3 rounded-lg transition-colors ${
+                  isSubmitting 
+                    ? "bg-gray-400 cursor-not-allowed" 
+                    : "bg-[#8B4513] hover:bg-[#A0522D]"
+                }`}
+                style={!isSubmitting ? { backgroundColor: '#8B4513' } : {}}
               >
-                Register
+                {isSubmitting ? "Registering..." : "Register"}
               </button>
 
               {/* OR Divider */}

@@ -6,6 +6,39 @@ import { db } from "@/firebase/firebase";
 import Image from "next/image";
 import { getExamSlug } from "@/lib/slugify";
 
+// Helper to derive short course labels like "MBBS", "B.Tech", "MBA"
+function getCourseShortForm(name?: string): string {
+  if (!name) return "";
+  const n = name.trim();
+
+  const patterns: { pattern: RegExp; short: string }[] = [
+    { pattern: /\bMBBS\b|Bachelor of Medicine.*Bachelor of Surgery/i, short: "MBBS" },
+    { pattern: /\bB\.?Tech\b|B\.?E\.?\b|Bachelor of Technology|Bachelor of Engineering/i, short: "B.Tech" },
+    { pattern: /\bM\.?Tech\b|M\.?E\.?\b|Master of Technology|Master of Engineering/i, short: "M.Tech" },
+    { pattern: /\bMBA\b|Master of Business Administration/i, short: "MBA" },
+    { pattern: /\bBBA\b|Bachelor of Business Administration/i, short: "BBA" },
+    { pattern: /\bB\.?Sc\b|Bachelor of Science/i, short: "B.Sc" },
+    { pattern: /\bM\.?Sc\b|Master of Science/i, short: "M.Sc" },
+    { pattern: /\bB\.?Com\b|Bachelor of Commerce/i, short: "B.Com" },
+    { pattern: /\bM\.?Com\b|Master of Commerce/i, short: "M.Com" },
+    { pattern: /\bBCA\b|Bachelor of Computer Applications?/i, short: "BCA" },
+    { pattern: /\bMCA\b|Master of Computer Applications?/i, short: "MCA" },
+    { pattern: /\bBDS\b|Bachelor of Dental Surgery/i, short: "BDS" },
+  ];
+
+  for (const { pattern, short } of patterns) {
+    if (pattern.test(n)) return short;
+  }
+
+  // Fallback: if a clear abbreviation exists in caps (e.g., "LLB")
+  const abbrev = n.match(/\b([A-Z]{2,5})\b/);
+  if (abbrev) return abbrev[1];
+
+  // If still long, trim to first 18 chars with ellipsis
+  if (n.length > 22) return n.slice(0, 18) + "...";
+  return n;
+}
+
 interface Exam {
   id: string;
   examName?: string;
@@ -138,36 +171,39 @@ export default function UpcomingExams() {
           const examSlug = getExamSlug({ ...exam, name: examName });
           const detailsHref = `/exam/${examSlug || exam.id}`;
           const courseText = exam.examOverview?.coursesOffered?.length
-            ? exam.examOverview.coursesOffered.join(" / ")
-            : exam.course || "N/A";
+            ? exam.examOverview.coursesOffered.map((c) => getCourseShortForm(c)).join(" / ")
+            : getCourseShortForm(exam.course || "N/A");
           const examDate = exam.examDate || "N/A";
 
           return (
             <div key={exam.id} className="upcomingExamWrapperDiv exam_card_new">
-              {/* Logo */}
-              <div className="exam_card_logo">
-                {exam.logo ? (
-                  <Image
-                    src={exam.logo}
-                    alt={`${shortName} Logo`}
-                    width={80}
-                    height={80}
-                    className="object-contain"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="exam_card_logo_placeholder">
-                    <span className="text-2xl font-bold text-gray-400">
-                      {shortName.slice(0, 3).toUpperCase()}
-                    </span>
-                  </div>
-                )}
-              </div>
+              {/* Logo and Title Container */}
+              <div className="exam_card_header">
+                {/* Logo */}
+                <div className="exam_card_logo">
+                  {exam.logo ? (
+                    <Image
+                      src={exam.logo}
+                      alt={`${shortName} Logo`}
+                      width={80}
+                      height={80}
+                      className="object-contain"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="exam_card_logo_placeholder">
+                      <span className="text-2xl font-bold text-gray-400">
+                        {shortName.slice(0, 3).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                </div>
 
-              {/* Exam Title and Subtitle */}
-              <div className="exam_card_title">
-                <h3>{displayTitle}</h3>
-                <p className="exam_card_subtitle">{shortName}</p>
+                {/* Exam Title */}
+                <div className="exam_card_title">
+                  <h3>{displayTitle}</h3>
+                  <p className="exam_card_subtitle">{shortName}</p>
+                </div>
               </div>
 
               {/* Horizontal Separator */}

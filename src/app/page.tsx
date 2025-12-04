@@ -74,7 +74,9 @@ function getShortForm(courseName: string): string {
 }
 
 export default function Home() {
-  const [popularCourses, setPopularCourses] = useState<Array<{ name: string; shortForm: string; id: string }>>([]);
+const [popularCourses, setPopularCourses] = useState<
+  Array<{ name: string; shortForm: string; id: string; slug: string }>
+>([]);
   const [loading, setLoading] = useState(true);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
 
@@ -89,7 +91,10 @@ export default function Home() {
     const unsubscribe = onSnapshot(
       coursesQ,
       (snapshot) => {
-        const coursesMap = new Map<string, { name: string; shortForm: string; id: string }>();
+        const coursesMap = new Map<
+          string,
+          { name: string; shortForm: string; id: string; slug: string }
+        >();
         
         snapshot.docs.forEach((doc) => {
           const data = doc.data();
@@ -98,6 +103,8 @@ export default function Home() {
           if (!courseName || !courseName.trim()) return;
           
           const shortForm = getShortForm(courseName);
+          const slug =
+            (typeof data.slug === "string" && data.slug.trim()) || slugifyCourseName(courseName);
           
           // Use short form as key to remove duplicates
           if (!coursesMap.has(shortForm)) {
@@ -105,6 +112,7 @@ export default function Home() {
               id: doc.id,
               name: courseName,
               shortForm: shortForm,
+              slug,
             });
           }
         });
@@ -175,11 +183,14 @@ export default function Home() {
                 {loading ? (
                   <span className="text-gray-500">Loading courses...</span>
                 ) : popularCourses.length > 0 ? (
-                  popularCourses.map((course) => (
-                    <a key={course.id} href={`/course/${course.id}`} title={course.name}>
-                      {course.shortForm}
-                    </a>
-                  ))
+                  popularCourses.map((course) => {
+                    const courseHref = course.slug ? `/course/${course.slug}` : `/course/${course.id}`;
+                    return (
+                      <a key={course.id} href={courseHref} title={course.name}>
+                        {course.shortForm}
+                      </a>
+                    );
+                  })
                 ) : (
                   // Fallback to default courses if no data
                   ['B.tech','B.Sc','B.com','BBA','BCA','BA','MBA','LLB','MCA','B.Pharm'].map((course, idx) => (

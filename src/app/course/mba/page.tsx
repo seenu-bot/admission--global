@@ -363,7 +363,7 @@ function MBAExplorerPageContent() {
   };
 
   useEffect(() => {
-    const map = new Map<string, College>();
+        const map = new Map<string, College>();
     let coursesLoaded = false;
     let collegesLoaded = false;
 
