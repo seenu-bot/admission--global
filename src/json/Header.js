@@ -6,13 +6,13 @@ export const contactDetails = [
 ];
 
 export const navigationLinks = [
-  { href: "/exams/overall", label: "Exams" },
-  { href: "/scholarships", label: "Scholarships" },
   { href: "/admissionform", label: "Admission 2025" },
+  { href: "/colleges", label: "Colleges" },
   { href: "/counselling", label: "Counselling" },
+  { href: "/exams/overall", label: "Exams" },
   { href: "/internships", label: "Internships" },
   { href: "/jobs", label: "Jobs" },
-  { href: "/colleges", label: "Colleges" },
+  { href: "/scholarships", label: "Scholarships" },
 ];
 
 export const socialLinks = [
@@ -124,6 +124,13 @@ export const navigationData = [
         title: "MBA Colleges by State",
         links: [
           // States will be populated dynamically from database
+        ],
+      },
+      {
+        title: "MBA Colleges in Abroad",
+        links: [
+          { label: "MBA Colleges in Mexico", url: "/course/mba?country=mexico" },
+          { label: "MBA Colleges in Spain", url: "/course/mba?country=spain" },
         ],
       },
       {

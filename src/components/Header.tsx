@@ -1286,7 +1286,7 @@ export default function Header() {
                       {nav.heading || "Explore Courses"}
                     </p>
 
-                    <div className="parent_wrapper">
+                    <div className={`parent_wrapper ${nav.heading === 'Management' ? 'management-dropdown' : ''}`}>
                       {/* Explore Courses - Dynamic - ONLY from Firebase */}
                       {nav.heading === 'Explore Courses' ? (
                         <>
@@ -1490,8 +1490,6 @@ export default function Header() {
                                         { name: 'Karnataka', type: 'state', url: '/course/mba?scope=india&state=Karnataka' },
                                         { name: 'Maharashtra', type: 'state', url: '/course/mba?scope=india&state=Maharashtra' },
                                         { name: 'Tamil Nadu', type: 'state', url: '/course/mba?scope=india&state=Tamil%20Nadu' },
-                                        { name: 'Mexico', type: 'country', url: '/course/mba?country=Mexico' },
-                                        { name: 'Spain', type: 'country', url: '/course/mba?country=Spain' },
                                       ];
                                       return (
                                         <div key={secIdx} className="type_of_navigation_wrap">
@@ -1600,8 +1598,6 @@ export default function Header() {
                                     { name: 'Karnataka', type: 'state', url: '/course/mba?scope=india&state=Karnataka' },
                                     { name: 'Maharashtra', type: 'state', url: '/course/mba?scope=india&state=Maharashtra' },
                                     { name: 'Tamil Nadu', type: 'state', url: '/course/mba?scope=india&state=Tamil%20Nadu' },
-                                    { name: 'Mexico', type: 'country', url: '/course/mba?country=Mexico' },
-                                    { name: 'Spain', type: 'country', url: '/course/mba?country=Spain' },
                                   ];
                                   return (
                                     <div key={secIdx} className="type_of_navigation_wrap">

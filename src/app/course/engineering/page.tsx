@@ -1036,8 +1036,7 @@ function EngineeringCoursePageContent() {
 
         <div className="flex justify-end gap-4 mt-8">
           <a
-            href={course.exploreLink || "#"}
-            target="_blank"
+            href="/colleges"
             className="bg-red-700 text-white px-5 py-2 rounded-lg hover:bg-red-800 transition"
           >
             Explore Colleges

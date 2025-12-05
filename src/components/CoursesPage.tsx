@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { collection, getDocs, DocumentData } from "firebase/firestore";
 import { db } from "@/firebase/firebase";
 import Image from "next/image";
+import { getCourseSlug } from "@/lib/slugify";
 
 // ✅ Define a type for your course data structure
 interface Course {
@@ -114,7 +115,7 @@ export default function CoursesPage() {
         )}
 
         <a
-          href={`/course/${course.id}`}
+          href={`/course/${getCourseSlug(course) || course.id}`}
           className="text-sm font-medium text-red-700 border border-red-700 hover:bg-red-700 hover:text-white px-3 py-2 rounded-lg"
         >
           More Details
@@ -215,22 +216,6 @@ export default function CoursesPage() {
           )}
         </>
       )}
-
-      {/* Pagination (Static) */}
-      <div className="flex justify-center mt-8 space-x-2">
-        {[1, 2, 3, 4, 5].map((page) => (
-          <button
-            key={page}
-            className={`w-8 h-8 rounded-full text-sm ${
-              page === 1
-                ? "bg-red-700 text-white"
-                : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-100"
-            }`}
-          >
-            {page}
-          </button>
-        ))}
-      </div>
     </section>
   );
 }

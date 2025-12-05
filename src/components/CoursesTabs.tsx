@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { collection, getDocs, DocumentData } from "firebase/firestore";
 import { db } from "@/firebase/firebase";
-import { slugify } from "@/lib/slugify";
+import { slugify, getCourseSlug } from "@/lib/slugify";
 
 // Helper to derive short course labels like "MBBS", "B.Tech", "MBA"
 function getCourseShortForm(name?: string): string {
@@ -244,11 +244,11 @@ export default function CoursesTabs() {
               {courses.length > 0 ? (
               courses.map((course: any) => {
                 const baseName = course.name || course.courseName || course.title || course.id;
-                const courseSlug = course.slug || slugify(baseName || "");
-                const coursePath = courseSlug ? `/course/${courseSlug}` : `/course/${course.id}`;
+                const courseSlug = getCourseSlug(course) || course.id;
+                const coursePath = `/course/${courseSlug}`;
                 const label = getCourseShortForm(baseName);
                 return (
-                <div key={course.id} className="explore_course_div">
+                  <div key={course.id} className="explore_course_div">
                     <p className="course_logo"></p>
 
                     <a href={coursePath} className="course_name">

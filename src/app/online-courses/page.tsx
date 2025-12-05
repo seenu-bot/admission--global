@@ -6,9 +6,11 @@ import Footer from "@/components/Footer";
 import FooterLinking from "@/components/FooterLinking";
 import Link from "next/link";
 import Image from "next/image";
-import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, limit, onSnapshot } from "firebase/firestore";
 import { db } from "@/firebase/firebase";
-import { getArticleSlug, getNewsSlug } from "@/lib/slugify";
+import CoursesTabs from "@/components/CoursesTabs";
+import LatestArticles from "@/components/LatestArticles";
+import LatestNews from "@/components/LatestNews";
 
 interface OnlineCourse {
   id: string;
@@ -20,14 +22,26 @@ interface OnlineCourse {
   [key: string]: any;
 }
 
+interface Review {
+  id: string;
+  name: string;
+  text: string;
+  rating?: number;
+  avatar?: string;
+  course?: string;
+  date?: any;
+  status?: string;
+  [key: string]: any;
+}
+
 export default function OnlineCoursesPage() {
   const [activeTab, setActiveTab] = useState<"PG" | "UG" | "Diploma">("PG");
   const [pgPrograms, setPgPrograms] = useState<OnlineCourse[]>([]);
   const [ugPrograms, setUgPrograms] = useState<OnlineCourse[]>([]);
   const [diplomaPrograms, setDiplomaPrograms] = useState<OnlineCourse[]>([]);
-  const [latestArticles, setLatestArticles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [articlesLoading, setArticlesLoading] = useState(true);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
 
   // Default programs with images
   const defaultPGPrograms: OnlineCourse[] = [
@@ -93,91 +107,127 @@ export default function OnlineCoursesPage() {
     fetchOnlineCourses();
   }, []);
 
-  // Fetch latest articles and news
-  useEffect(() => {
-    const fetchLatestContent = async () => {
-      try {
-        const articles: any[] = [];
-        
-        try {
-          const articlesRef = collection(db, "articles");
-          const articlesQuery = query(articlesRef, orderBy("date", "desc"), limit(5));
-          const articlesSnapshot = await getDocs(articlesQuery);
-          articlesSnapshot.docs.forEach((doc) => {
-            const data = doc.data();
-            articles.push({
-              id: doc.id,
-              title: data.title || "",
-              description: data.description || "",
-              date: data.date,
-              type: "article",
-              slug: getArticleSlug({ id: doc.id, ...data }),
-            });
-          });
-        } catch (err) {
-          console.error("Error fetching articles:", err);
-        }
 
-        try {
-          const newsRef = collection(db, "news");
-          const newsQuery = query(newsRef, orderBy("date", "desc"), limit(5));
-          const newsSnapshot = await getDocs(newsQuery);
-          newsSnapshot.docs.forEach((doc) => {
-            const data = doc.data();
-            articles.push({
-              id: doc.id,
-              title: data.title || "",
-              description: data.description || "",
-              date: data.date,
-              type: "news",
-              slug: getNewsSlug({ id: doc.id, ...data }),
-            });
-          });
-        } catch (err) {
-          console.error("Error fetching news:", err);
-        }
-
-        const sortedArticles = articles
-          .sort((a, b) => {
-            const dateA = a.date ? (a.date.toDate ? a.date.toDate().getTime() : new Date(a.date).getTime()) : 0;
-            const dateB = b.date ? (b.date.toDate ? b.date.toDate().getTime() : new Date(b.date).getTime()) : 0;
-            return dateB - dateA;
-          })
-          .slice(0, 10);
-
-        setLatestArticles(sortedArticles);
-      } catch (error) {
-        console.error("Error fetching latest content:", error);
-      } finally {
-        setArticlesLoading(false);
-      }
-    };
-
-    fetchLatestContent();
-  }, []);
-
-  const testimonials = [
+  // Default reviews fallback
+  const defaultReviews: Review[] = [
     {
+      id: "1",
       name: "Rajat Kumar",
       text: "Great courses, highly recommended!",
+      rating: 5,
       avatar: "https://ui-avatars.com/api/?name=Rajat+Kumar&background=random",
     },
     {
+      id: "2",
       name: "Sneha Saxena",
       text: "Loved the flexibility and quality of content.",
+      rating: 5,
       avatar: "https://ui-avatars.com/api/?name=Sneha+Saxena&background=random",
     },
     {
+      id: "3",
       name: "Akaash Shah",
       text: "Great!! The faculty of the digital marketing course is too good.",
+      rating: 5,
       avatar: "https://ui-avatars.com/api/?name=Akaash+Shah&background=random",
     },
     {
+      id: "4",
       name: "Arnav Sharma",
       text: "I recommend the MBA Online course for the fast paced learners, who want to develop management skills...",
+      rating: 5,
       avatar: "https://ui-avatars.com/api/?name=Arnav+Sharma&background=random",
     },
   ];
+
+  // Fetch reviews from Firebase with real-time updates
+  useEffect(() => {
+    setReviewsLoading(true);
+    let unsubscribe: (() => void) | null = null;
+
+    const processReviews = (snapshot: any) => {
+      if (!snapshot.empty) {
+        const reviewsList: Review[] = snapshot.docs.map((doc: any) => {
+          const data = doc.data();
+          const name = data.name || data.fullName || data.studentName || "Anonymous";
+          // Handle message field from Firebase (as shown in console) and other field variations
+          const text = data.message || data.text || data.review || data.comment || data.feedback || "";
+          const rating = data.rating || data.stars || 5;
+          
+          // Generate avatar URL if not provided
+          const avatar = data.avatar || data.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`;
+          
+          return {
+            id: doc.id,
+            name,
+            text,
+            rating: Math.min(5, Math.max(1, rating)), // Ensure rating is between 1-5
+            avatar,
+            course: data.course || data.courseName || "",
+            date: data.date || data.createdAt,
+            status: data.status || "published",
+          };
+        });
+        
+        // Filter out reviews without text and filter by published status if available
+        const validReviews = reviewsList.filter((review) => {
+          const hasText = review.text && review.text.trim().length > 0;
+          const isPublished = !review.status || review.status === "published";
+          return hasText && isPublished;
+        });
+        
+        if (validReviews.length > 0) {
+          setReviews(validReviews.slice(0, 8)); // Limit to 8 reviews
+        } else {
+          setReviews(defaultReviews);
+        }
+      } else {
+        setReviews(defaultReviews);
+      }
+      setReviewsLoading(false);
+    };
+
+    // Try "reviews" collection first with real-time listener
+    try {
+      const reviewsRef = collection(db, "reviews");
+      const reviewsQuery = query(reviewsRef, orderBy("date", "desc"), limit(10));
+      
+      unsubscribe = onSnapshot(
+        reviewsQuery,
+        (snapshot) => {
+          processReviews(snapshot);
+        },
+        (error) => {
+          console.error("Error fetching reviews:", error);
+          // Try "testimonials" collection as fallback
+          const testimonialsRef = collection(db, "testimonials");
+          const testimonialsQuery = query(testimonialsRef, orderBy("date", "desc"), limit(10));
+          
+          onSnapshot(
+            testimonialsQuery,
+            (testimonialsSnapshot) => {
+              processReviews(testimonialsSnapshot);
+            },
+            (fallbackError) => {
+              console.error("Error fetching testimonials:", fallbackError);
+              setReviews(defaultReviews);
+              setReviewsLoading(false);
+            }
+          );
+        }
+      );
+    } catch (error) {
+      console.error("Error setting up reviews listener:", error);
+      setReviews(defaultReviews);
+      setReviewsLoading(false);
+    }
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, []);
 
   const getCurrentPrograms = () => {
     switch (activeTab) {
@@ -253,118 +303,11 @@ export default function OnlineCoursesPage() {
       </section>
 
       {/* Explore Courses Section */}
-      <section id="explore-courses" className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-              EXPLORE OUR COURSES
-            </h2>
-            <h3 className="text-2xl md:text-3xl font-semibold text-gray-800 mb-2">
-              Programs for the Future
-            </h3>
-            <p className="text-lg text-gray-600">Choose your ideal</p>
-          </div>
-
-          {/* Tabs */}
-          <div className="flex gap-4 mb-8">
-            <button
-              onClick={() => setActiveTab("PG")}
-              className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
-                activeTab === "PG"
-                  ? "bg-purple-600 text-white"
-                  : "bg-white text-gray-800 border border-gray-300"
-              }`}
-            >
-              Online PG Programmes
-            </button>
-            <button
-              onClick={() => setActiveTab("UG")}
-              className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
-                activeTab === "UG"
-                  ? "bg-purple-600 text-white"
-                  : "bg-white text-gray-800 border border-gray-300"
-              }`}
-            >
-              Online UG Programmes
-            </button>
-            <button
-              onClick={() => setActiveTab("Diploma")}
-              className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
-                activeTab === "Diploma"
-                  ? "bg-purple-600 text-white"
-                  : "bg-white text-gray-800 border border-gray-300"
-              }`}
-            >
-              Online Diploma Programmes
-            </button>
-          </div>
-
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-            </div>
-          ) : (
-            <div className="overflow-x-auto pb-4">
-              <div className="flex gap-6 min-w-max">
-                {getCurrentPrograms().map((program) => (
-                  <div
-                    key={program.id}
-                    className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow min-w-[280px] max-w-[280px] flex-shrink-0"
-                  >
-                    {program.image && (
-                      <div className="relative w-full h-48">
-                        <Image
-                          src={program.image}
-                          alt={program.name}
-                          fill
-                          className="object-cover"
-                          unoptimized
-                        />
-                      </div>
-                    )}
-                    <div className="p-6">
-                      <h4 className="text-xl font-semibold text-gray-800 mb-2">{program.name}</h4>
-                      <p className="text-gray-600 mb-4">
-                        Duration <br />
-                        <span className="font-semibold">{program.duration}</span>
-                      </p>
-                      <button className="w-full bg-red-600 text-white font-semibold py-2 rounded-lg hover:bg-red-700 transition-colors">
-                        Apply Now &gt;
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Our Partners Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-              Our <span className="line-through opacity-50">Partners</span>
-            </h2>
-          </div>
-          <div className="flex flex-wrap justify-center items-center gap-8 opacity-60">
-            {/* Placeholder for partner logos - can be replaced with actual logos */}
-            <div className="w-32 h-16 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
-              Partner Logo
-            </div>
-            <div className="w-32 h-16 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
-              Partner Logo
-            </div>
-            <div className="w-32 h-16 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
-              Partner Logo
-            </div>
-            <div className="w-32 h-16 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
-              Partner Logo
-            </div>
-            <div className="w-32 h-16 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
-              Partner Logo
-            </div>
+      <section id="explore-courses">
+        <div id="preferredCourseSection">
+          <div className="container" id="Explore_course">
+            <h2>Explore Courses</h2>
+            <CoursesTabs />
           </div>
         </div>
       </section>
@@ -378,101 +321,74 @@ export default function OnlineCoursesPage() {
             </h2>
             <h3 className="text-2xl font-semibold text-gray-700">Testimonials</h3>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {testimonials.map((testimonial, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
-              >
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 rounded-full overflow-hidden mr-3">
-                    <Image
-                      src={testimonial.avatar}
-                      alt={testimonial.name}
-                      width={48}
-                      height={48}
-                      className="object-cover"
-                      unoptimized
-                    />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-800">{testimonial.name}</p>
-                    <div className="flex items-center">
-                      {[...Array(5)].map((_, i) => (
-                        <svg
-                          key={i}
-                          className="w-4 h-4 text-yellow-400"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ))}
+          {reviewsLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="bg-white rounded-lg shadow-md p-6 animate-pulse">
+                  <div className="flex items-center mb-4">
+                    <div className="w-12 h-12 rounded-full bg-gray-200 mr-3"></div>
+                    <div className="flex-1">
+                      <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded w-20"></div>
                     </div>
                   </div>
-                </div>
-                <p className="text-gray-700 text-sm">"{testimonial.text}"</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Latest News and Articles Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-              Latest News and Articles
-            </h2>
-            <p className="text-lg text-gray-600">Stay updated with our informative content</p>
-          </div>
-          {articlesLoading ? (
-            <div className="flex gap-6 overflow-x-auto pb-4">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div
-                  key={i}
-                  className="bg-gray-50 rounded-lg p-4 animate-pulse min-w-[300px] flex-shrink-0"
-                >
-                  <div className="h-6 w-3/4 bg-gray-200 rounded mb-2"></div>
-                  <div className="h-4 w-full bg-gray-200 rounded"></div>
+                  <div className="h-16 bg-gray-200 rounded"></div>
                 </div>
               ))}
             </div>
-          ) : latestArticles.length > 0 ? (
-            <div className="flex gap-6 overflow-x-auto pb-4">
-              {latestArticles.map((item) => {
-                const isNews = item.type === "news";
-                const slug = isNews
-                  ? item.slug || getNewsSlug(item)
-                  : item.slug || getArticleSlug(item);
-                const href = isNews ? `/news/${slug || item.id}` : `/articles/${slug || item.id}`;
-
-                return (
-                  <Link
-                    key={item.id}
-                    href={href}
-                    className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors cursor-pointer block min-w-[300px] flex-shrink-0"
-                  >
-                    <h4 className="font-semibold text-gray-800 mb-2 line-clamp-2">
-                      {item.title}
-                    </h4>
-                    {item.description && (
-                      <p className="text-sm text-gray-600 line-clamp-2">
-                        {item.description}
-                      </p>
-                    )}
-                  </Link>
-                );
-              })}
+          ) : reviews.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {reviews.map((review) => (
+                <div
+                  key={review.id}
+                  className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+                >
+                  <div className="flex items-center mb-4">
+                    <div className="w-12 h-12 rounded-full overflow-hidden mr-3">
+                      <Image
+                        src={review.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(review.name)}&background=random`}
+                        alt={review.name}
+                        width={48}
+                        height={48}
+                        className="object-cover"
+                        unoptimized
+                      />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800">{review.name}</p>
+                      <div className="flex items-center">
+                        {[...Array(5)].map((_, i) => (
+                          <svg
+                            key={i}
+                            className={`w-4 h-4 ${
+                              i < (review.rating || 5) ? "text-yellow-400" : "text-gray-300"
+                            }`}
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-gray-700 text-sm">"{review.text}"</p>
+                </div>
+              ))}
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-gray-600">No articles found.</p>
+              <p className="text-gray-600">No reviews available.</p>
             </div>
           )}
         </div>
       </section>
+
+      {/* Latest Articles and Latest News */}
+      <div className="container px-4 sm:px-0">
+        <LatestArticles />
+        <LatestNews />
+      </div>
 
       {/* Got More Questions Section */}
       <section className="py-16 bg-white">
@@ -485,7 +401,7 @@ export default function OnlineCoursesPage() {
               </p>
             </div>
             <Link
-              href="/counselling"
+              href="/contact-us"
               className="inline-block bg-orange-500 text-white font-semibold px-8 py-3 rounded-lg hover:bg-orange-600 transition-colors whitespace-nowrap"
             >
               Contact Us

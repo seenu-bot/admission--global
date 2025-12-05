@@ -407,30 +407,30 @@ export default function ExamsByCourse({ params }: { params: Promise<{ course: st
                    <div key={exam.id} className="listing_data_card exam_card_new">
                      {/* Logo and Title Container */}
                      <div className="exam_card_header">
-                       {/* Logo */}
-                       <div className="exam_card_logo">
-                         {exam.logo ? (
-                           <Image
-                             src={exam.logo}
-                             alt={`${shortName} Logo`}
-                             width={80}
-                             height={80}
-                             className="object-contain"
-                             priority={false}
-                           />
-                         ) : (
-                           <div className="exam_card_logo_placeholder">
-                             <span className="text-2xl font-bold text-gray-400">
-                               {shortName.slice(0, 3).toUpperCase()}
-                             </span>
-                           </div>
-                         )}
-                       </div>
+                     {/* Logo */}
+                     <div className="exam_card_logo">
+                       {exam.logo ? (
+                         <Image
+                           src={exam.logo}
+                           alt={`${shortName} Logo`}
+                           width={80}
+                           height={80}
+                           className="object-contain"
+                           priority={false}
+                         />
+                       ) : (
+                         <div className="exam_card_logo_placeholder">
+                           <span className="text-2xl font-bold text-gray-400">
+                             {shortName.slice(0, 3).toUpperCase()}
+                           </span>
+                         </div>
+                       )}
+                     </div>
 
                        {/* Exam Title */}
-                       <div className="exam_card_title">
-                         <h3>{displayTitle}</h3>
-                         <p className="exam_card_subtitle">{shortName}</p>
+                     <div className="exam_card_title">
+                       <h3>{displayTitle}</h3>
+                       <p className="exam_card_subtitle">{shortName}</p>
                        </div>
                      </div>
 

@@ -139,3 +139,19 @@ export function getJobSlug(job: any): string {
   return "";
 }
 
+export function getCourseSlug(course: any): string {
+  if (!course) return "";
+
+  const explicitSlug = typeof course.slug === "string" ? course.slug.trim() : "";
+  if (explicitSlug) return explicitSlug;
+
+  const derivedName = course.courseName || course.name || course.title;
+  const slugFromName = slugify(derivedName);
+  if (slugFromName) return slugFromName;
+
+  const fallback = slugify(course.id);
+  if (fallback) return fallback;
+
+  return "";
+}
+

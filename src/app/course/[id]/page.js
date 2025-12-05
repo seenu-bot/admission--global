@@ -296,12 +296,12 @@ export default function CourseDetailsPage({ params }) {
               {course.topRecruiters.map((r, i) => {
                 const text = toDisplayText(r);
                 return text ? (
-                  <span
-                    key={i}
-                    className="bg-white border border-gray-200 shadow-sm px-4 py-2 rounded-full text-sm text-gray-700"
-                  >
+                <span
+                  key={i}
+                  className="bg-white border border-gray-200 shadow-sm px-4 py-2 rounded-full text-sm text-gray-700"
+                >
                     {text}
-                  </span>
+                </span>
                 ) : null;
               })}
             </div>
@@ -371,8 +371,7 @@ export default function CourseDetailsPage({ params }) {
         {/* CTA */}
         <div className="flex justify-end gap-4 mt-8">
           <a
-            href={course.exploreLink || "#"}
-            target="_blank"
+            href="/colleges"
             className="bg-red-700 text-white px-5 py-2 rounded-lg hover:bg-red-800 transition"
           >
             Explore Colleges

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useMemo } from "react";
 import Link from "next/link";
 import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
 import { db } from "@/firebase/firebase";
-import { getCollegeSlug, getExamSlug, getScholarshipSlug, getInternshipSlug, getJobSlug, getArticleSlug, getNewsSlug } from "@/lib/slugify";
+import { getCollegeSlug, getExamSlug, getScholarshipSlug, getInternshipSlug, getJobSlug, getArticleSlug, getNewsSlug, getCourseSlug } from "@/lib/slugify";
 
 interface HomeSearchModalProps {
   isOpen: boolean;
@@ -812,10 +812,12 @@ function HomeSearchModal({ isOpen, onClose }: HomeSearchModalProps) {
                           Courses ({filteredCourses.length})
                         </h3>
                         <div className="space-y-2">
-                          {filteredCourses.map((course) => (
+                          {filteredCourses.map((course) => {
+                            const courseSlug = getCourseSlug(course) || course.id;
+                            return (
                             <Link
                               key={course.id}
-                              href={`/course/${course.id}`}
+                                href={`/course/${courseSlug}`}
                               className="block p-4 border border-gray-200 rounded-lg hover:border-orange-500 hover:bg-orange-50 transition-all"
                               onClick={onClose}
                             >
@@ -824,7 +826,8 @@ function HomeSearchModal({ isOpen, onClose }: HomeSearchModalProps) {
                                 <div className="text-sm text-gray-600 mt-1">{course.shortForm}</div>
                               )}
                             </Link>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                     )}

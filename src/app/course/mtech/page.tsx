@@ -838,7 +838,7 @@ function MTechExplorerPageContent() {
         <div className="popularCollegeSearch" style={{ marginTop: '24px' }}>
           <p style={{ fontSize: '12px', fontWeight: 400, marginBottom: '8px' }}>Popular Courses</p>
           <div className="pop_clg_link" style={{ display: 'flex', gap: '5px 20px', flexWrap: 'wrap' }}>
-            <a href="/course/mbbs" style={{ fontSize: '12px', fontWeight: 700, color: '#a03318' }}>MBBS</a>
+            <a href="/course/mbbs" style={{ fontSize: '12px', fontWeight: 700, color: '#A03318' }}>MBBS</a>
           </div>
         </div>
 
@@ -1261,8 +1261,7 @@ function MTechExplorerPageContent() {
               {/* CTA */}
               <div className="flex justify-end gap-4 mt-8">
                 <a
-                  href={course.exploreLink || "#"}
-                  target="_blank"
+                  href="/colleges"
                   className="bg-red-700 text-white px-5 py-2 rounded-lg hover:bg-red-800 transition"
                 >
                   Explore Colleges

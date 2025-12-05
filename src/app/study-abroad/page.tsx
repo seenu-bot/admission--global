@@ -5,17 +5,33 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FooterLinking from "@/components/FooterLinking";
 import Link from "next/link";
-import { getArticleSlug } from "@/lib/slugify";
+import { getNewsSlug } from "@/lib/slugify";
 import Image from "next/image";
 import { collection, getDocs, query, orderBy, limit, where } from "firebase/firestore";
 import { db } from "@/firebase/firebase";
+import StudyAbroadModal from "@/components/StudyAbroadModal";
 
 export default function StudyAbroadPage() {
-  const [blogs, setBlogs] = useState<any[]>([]);
+  const [news, setNews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalConfig, setModalConfig] = useState<{
+    formType: string;
+    title: string;
+    description: string;
+  }>({
+    formType: "general",
+    title: "Get in Touch",
+    description: "Fill out the form below and our team will get back to you.",
+  });
 
-  // Default blog articles for study abroad
-  const defaultBlogs = [
+  const openModal = (formType: string, title: string, description: string) => {
+    setModalConfig({ formType, title, description });
+    setModalOpen(true);
+  };
+
+  // Default news for study abroad
+  const defaultNews = [
     {
       id: "1",
       title: "Ace the Duolingo Test",
@@ -89,36 +105,36 @@ export default function StudyAbroadPage() {
   ];
 
   useEffect(() => {
-    const fetchBlogs = async () => {
+    const fetchNews = async () => {
       try {
-        // Try to fetch study abroad related articles from Firebase
-        const articlesRef = collection(db, "articles");
-        // Fetch all articles and filter client-side for study abroad related content
-        const articlesQuery = query(articlesRef, orderBy("date", "desc"), limit(20));
+        // Try to fetch study abroad related news from Firebase
+        const newsRef = collection(db, "news");
+        // Fetch all news and filter client-side for study abroad related content
+        const newsQuery = query(newsRef, orderBy("date", "desc"), limit(20));
         
         try {
-          const articlesSnapshot = await getDocs(articlesQuery);
-          if (!articlesSnapshot.empty) {
+          const newsSnapshot = await getDocs(newsQuery);
+          if (!newsSnapshot.empty) {
             const studyAbroadKeywords = ["study abroad", "ielts", "toefl", "gmat", "pte", "duolingo", "sat", "gre", "exam", "visa", "scholarship"];
             const patterns = ["cubes", "person", "city"];
             const colors = ["bg-blue-100", "bg-green-100", "bg-pink-100"];
-            let blogIndex = 0;
+            let newsIndex = 0;
             
-            const blogsList = articlesSnapshot.docs
+            const newsList = newsSnapshot.docs
               .map((doc) => {
                 const data = doc.data();
                 const title = (data.title || "").toLowerCase();
                 const category = (data.category || "").toLowerCase();
                 const description = (data.description || "").toLowerCase();
                 
-                // Check if article is related to study abroad
+                // Check if news is related to study abroad
                 const isRelated = studyAbroadKeywords.some(
                   (keyword) => title.includes(keyword) || category.includes(keyword) || description.includes(keyword)
                 );
                 
                 if (isRelated) {
-                  const index = blogIndex % 3;
-                  blogIndex++;
+                  const index = newsIndex % 3;
+                  newsIndex++;
                   return {
                     id: doc.id,
                     title: data.title || "",
@@ -130,31 +146,31 @@ export default function StudyAbroadPage() {
                 }
                 return null;
               })
-              .filter((blog) => blog !== null)
+              .filter((newsItem) => newsItem !== null)
               .slice(0, 10);
             
-            if (blogsList.length > 0) {
-              setBlogs(blogsList);
+            if (newsList.length > 0) {
+              setNews(newsList);
             } else {
-              setBlogs(defaultBlogs);
+              setNews(defaultNews);
             }
           } else {
-            setBlogs(defaultBlogs);
+            setNews(defaultNews);
           }
         } catch (err) {
-          console.error("Error fetching articles:", err);
-          // If query fails, use default blogs
-          setBlogs(defaultBlogs);
+          console.error("Error fetching news:", err);
+          // If query fails, use default news
+          setNews(defaultNews);
         }
       } catch (error) {
-        console.error("Error fetching blogs:", error);
-        setBlogs(defaultBlogs);
+        console.error("Error fetching news:", error);
+        setNews(defaultNews);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchBlogs();
+    fetchNews();
   }, []);
 
   return (
@@ -164,22 +180,22 @@ export default function StudyAbroadPage() {
       {/* Hero Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Study Abroad
           </h1>
-          <p className="text-2xl md:text-3xl text-gray-800 mb-2">
+          <p className="text-xl md:text-2xl text-gray-800 mb-2">
             by seeking guidance
           </p>
-          <p className="text-xl md:text-2xl text-orange-500 mb-8">
+          <p className="text-lg md:text-xl text-orange-500 mb-8">
             from experts
           </p>
-          <Link
-            href="#find-university"
+          <button
+            onClick={() => openModal("find_university", "Find the Right University", "Fill out the form below and our experts will help you find the perfect university for your studies abroad.")}
             className="inline-flex items-center gap-2 bg-orange-500 text-white font-semibold px-8 py-4 rounded-lg hover:bg-orange-600 transition-colors"
           >
             Click here to find the right university
             <span className="text-xl">&gt;</span>
-          </Link>
+          </button>
         </div>
       </section>
 
@@ -188,19 +204,19 @@ export default function StudyAbroadPage() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
             <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold text-gray-900 mb-2">4k</div>
+              <div className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">4k</div>
               <div className="text-gray-600">universities</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold text-gray-900 mb-2">3k</div>
+              <div className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">3k</div>
               <div className="text-gray-600">mentors</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold text-gray-900 mb-2">40</div>
+              <div className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">40</div>
               <div className="text-gray-600">Countries</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold text-gray-900 mb-2">90K +</div>
+              <div className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">90K +</div>
               <div className="text-gray-600">Sucess Stories</div>
             </div>
           </div>
@@ -213,34 +229,34 @@ export default function StudyAbroadPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
             {/* Find Your Perfect University After 12th */}
             <div className="bg-pink-50 rounded-2xl p-8 hover:shadow-lg transition-shadow">
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+              <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-4">
                 Find Your Perfect University After 12th!
               </h2>
-              <p className="text-gray-700 mb-6">
+              <p className="text-gray-700 mb-6 text-base">
                 Explore top universities worldwide with our Wishlist tool. Tailored for 12th graders, it simplifies finding your ideal undergraduate program. Dream big and discover more!
               </p>
-              <Link
-                href="#wishlist"
+              <button
+                onClick={() => openModal("wishlist_ug", "Explore Universities After 12th", "Fill out the form below and our experts will help you explore top universities worldwide for your undergraduate program.")}
                 className="inline-flex items-center gap-2 text-purple-700 font-semibold hover:text-purple-800 transition-colors"
               >
                 Explore Universities Now &gt;
-              </Link>
+              </button>
             </div>
 
             {/* Your Postgrad Journey Starts Here */}
             <div className="bg-blue-50 rounded-2xl p-8 hover:shadow-lg transition-shadow">
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+              <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-4">
                 Your Postgrad Journey Starts Here!
               </h2>
-              <p className="text-gray-700 mb-6">
+              <p className="text-gray-700 mb-6 text-base">
                 Graduates, elevate your education globally! Our Wishlist tool guides you to prestigious master's and Ph.D. programs. Start shaping your advanced academic path today!
               </p>
-              <Link
-                href="#wishlist"
+              <button
+                onClick={() => openModal("wishlist_pg", "Start Your Postgrad Journey", "Fill out the form below and our experts will guide you to prestigious master's and Ph.D. programs worldwide.")}
                 className="inline-flex items-center gap-2 text-purple-700 font-semibold hover:text-purple-800 transition-colors"
               >
                 Start Your Journey - for graduate &gt;
-              </Link>
+              </button>
             </div>
           </div>
 
@@ -248,66 +264,66 @@ export default function StudyAbroadPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Wishlist Universities */}
             <div className="bg-pink-50 rounded-2xl p-8 hover:shadow-lg transition-shadow">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">
                 Wishlist Universities
               </h2>
-              <p className="text-gray-700 mb-6">
+              <p className="text-gray-700 mb-6 text-base">
                 Our latest course finder will help you find the right university
               </p>
-              <Link
-                href="#wishlist"
+              <button
+                onClick={() => openModal("wishlist", "Wishlist Universities", "Fill out the form below and our course finder will help you find the right university for your studies abroad.")}
                 className="inline-flex items-center gap-2 bg-pink-100 text-gray-900 font-semibold px-6 py-3 rounded-lg hover:bg-pink-200 transition-colors"
               >
                 Find the right university &gt;
-              </Link>
+              </button>
             </div>
 
             {/* Exams you can take */}
             <div className="bg-blue-50 rounded-2xl p-8 hover:shadow-lg transition-shadow">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">
                 Exams you can take
               </h2>
-              <p className="text-gray-700 mb-6">
+              <p className="text-gray-700 mb-6 text-base">
                 IELTS, TOEFL, Duolingo English Test, GMAT, GRE
               </p>
-              <Link
-                href="#exams"
+              <button
+                onClick={() => openModal("exams", "Know More About Exams", "Fill out the form below to get detailed information about IELTS, TOEFL, Duolingo English Test, GMAT, GRE and other exams.")}
                 className="inline-flex items-center gap-2 bg-blue-100 text-gray-900 font-semibold px-6 py-3 rounded-lg hover:bg-blue-200 transition-colors"
               >
                 Know more &gt;
-              </Link>
+              </button>
             </div>
 
             {/* Apply for Education Loan */}
             <div className="bg-green-50 rounded-2xl p-8 hover:shadow-lg transition-shadow">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">
                 Apply for Education Loan
               </h2>
-              <p className="text-gray-700 mb-6">
+              <p className="text-gray-700 mb-6 text-base">
                 Take financial assistance to make your dream of studying abroad come true.
               </p>
-              <Link
-                href="/counselling"
+              <button
+                onClick={() => openModal("education_loan", "Apply for Education Loan", "Fill out the form below and our loan experts will help you get financial assistance to make your dream of studying abroad come true.")}
                 className="inline-flex items-center gap-2 bg-green-100 text-gray-900 font-semibold px-6 py-3 rounded-lg hover:bg-green-200 transition-colors"
               >
                 Talk to loan expert &gt;
-              </Link>
+              </button>
             </div>
 
             {/* Check Scholarships */}
             <div className="bg-red-50 rounded-2xl p-8 hover:shadow-lg transition-shadow">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">
                 Check Scholarships
               </h2>
-              <p className="text-gray-700 mb-6">
+              <p className="text-gray-700 mb-6 text-base">
                 Go for the best Scholarships available for you
               </p>
-              <Link
-                href="/scholarships"
+              <button
+                onClick={() => openModal("scholarship", "Find Scholarships", "Fill out the form below and our experts will help you find the best scholarships available for your studies abroad.")}
                 className="inline-flex items-center gap-2 bg-red-100 text-gray-900 font-semibold px-6 py-3 rounded-lg hover:bg-red-200 transition-colors"
               >
                 Find Scholarship &gt;
-              </Link>
+              </button>
             </div>
           </div>
         </div>
@@ -317,19 +333,19 @@ export default function StudyAbroadPage() {
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="bg-blue-100 rounded-2xl p-8 md:p-12 max-w-4xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
               Visa Application
             </h2>
-            <p className="text-lg text-gray-700 mb-6">
+            <p className="text-base text-gray-700 mb-6">
               Get in touch with our experts for Visa related queries
             </p>
-            <Link
-              href="/counselling"
+            <button
+              onClick={() => openModal("visa", "Apply for Visa", "Fill out the form below and our visa experts will help you with all your visa-related queries and applications.")}
               className="inline-flex items-center gap-2 bg-purple-500 text-white font-semibold px-8 py-3 rounded-lg hover:bg-purple-600 transition-colors shadow-md"
             >
               Apply for Visa
               <span className="text-xl">&gt;</span>
-            </Link>
+            </button>
           </div>
         </div>
       </section>
@@ -340,23 +356,23 @@ export default function StudyAbroadPage() {
           <div className="bg-white rounded-2xl shadow-lg p-8 md:p-12 max-w-6xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
               <div>
-                <h2 className="text-3xl md:text-4xl font-bold text-orange-500 mb-6">
+                <h2 className="text-2xl md:text-3xl font-bold text-orange-500 mb-6">
                   Course Finder
                 </h2>
-                <p className="text-lg text-gray-700 mb-8 leading-relaxed">
+                <p className="text-base text-gray-700 mb-8 leading-relaxed">
                   Check if you are<br />
                   eligible for<br />
                   admission to<br />
                   the shortlisted<br />
                   university
                 </p>
-                <Link
-                  href="/counselling"
+                <button
+                  onClick={() => openModal("eligibility", "Check Eligibility", "Fill out the form below and our experts will check if you are eligible for admission to your shortlisted university.")}
                   className="inline-flex items-center gap-2 bg-orange-500 text-white font-semibold px-8 py-3 rounded-lg hover:bg-orange-600 transition-colors"
                 >
                   Check Eligibility
                   <span className="text-xl">&gt;</span>
-                </Link>
+                </button>
               </div>
               <div className="bg-purple-50 rounded-xl p-8 h-full flex items-center justify-center">
                 {/* Illustration placeholder - you can add an actual illustration here */}
@@ -385,10 +401,10 @@ export default function StudyAbroadPage() {
         </div>
       </section>
 
-      {/* Blogs Section */}
+      {/* News Section */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-12">Blogs</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-12">News</h2>
           
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -398,17 +414,17 @@ export default function StudyAbroadPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {blogs.map((blog) => {
-                const blogSlug = getArticleSlug(blog);
+              {news.map((newsItem) => {
+                const newsSlug = getNewsSlug(newsItem);
                 return (
                   <Link
-                    key={blog.id}
-                    href={`/articles/${blogSlug || blog.id}`}
-                    className={`${blog.bgColor} rounded-2xl p-6 hover:shadow-lg transition-all relative overflow-hidden group cursor-pointer`}
+                    key={newsItem.id}
+                    href={`/news/${newsSlug || newsItem.id}`}
+                    className={`${newsItem.bgColor} rounded-2xl p-6 hover:shadow-lg transition-all relative overflow-hidden group cursor-pointer`}
                   >
                   {/* Read Time */}
                   <div className="absolute top-4 left-4 text-xs font-medium text-gray-700 bg-white/80 px-2 py-1 rounded">
-                    {blog.readTime}
+                    {newsItem.readTime}
                   </div>
                   
                   {/* Arrow Icon */}
@@ -418,14 +434,14 @@ export default function StudyAbroadPage() {
 
                   {/* Title */}
                   <div className="mt-12">
-                    <h3 className="text-xl md:text-2xl font-bold text-purple-900 mb-4">
-                      {blog.title}
+                    <h3 className="text-base md:text-lg font-bold text-purple-900 mb-4">
+                      {newsItem.title}
                     </h3>
                   </div>
 
                   {/* Background Pattern */}
                   <div className="absolute bottom-0 right-0 w-32 h-32 opacity-20">
-                    {blog.bgPattern === "cubes" && (
+                    {newsItem.bgPattern === "cubes" && (
                       <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <rect x="10" y="10" width="20" height="20" fill="#7c3aed" rx="2"/>
                         <rect x="35" y="15" width="20" height="20" fill="#a855f7" rx="2"/>
@@ -435,14 +451,14 @@ export default function StudyAbroadPage() {
                         <rect x="70" y="50" width="20" height="20" fill="#c084fc" rx="2"/>
                       </svg>
                     )}
-                    {blog.bgPattern === "person" && (
+                    {newsItem.bgPattern === "person" && (
                       <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <circle cx="50" cy="30" r="15" fill="#059669"/>
                         <path d="M30 70 Q50 50 70 70" stroke="#059669" strokeWidth="4" fill="none"/>
                         <rect x="40" y="70" width="20" height="25" fill="#059669" rx="10"/>
                       </svg>
                     )}
-                    {blog.bgPattern === "city" && (
+                    {newsItem.bgPattern === "city" && (
                       <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <rect x="10" y="50" width="15" height="40" fill="#ec4899" rx="2"/>
                         <rect x="30" y="40" width="15" height="50" fill="#f472b6" rx="2"/>
@@ -461,6 +477,15 @@ export default function StudyAbroadPage() {
 
       <FooterLinking />
       <Footer />
+
+      {/* Study Abroad Modal */}
+      <StudyAbroadModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        formType={modalConfig.formType}
+        title={modalConfig.title}
+        description={modalConfig.description}
+      />
     </main>
   );
 }

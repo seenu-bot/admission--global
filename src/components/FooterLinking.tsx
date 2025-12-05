@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { collection, onSnapshot, query, limit } from "firebase/firestore";
 import { db } from "@/firebase/firebase";
-import { getCollegeSlug, getExamSlug } from "@/lib/slugify";
+import { getCollegeSlug, getExamSlug, getCourseSlug } from "@/lib/slugify";
 
 interface FooterLink {
   name: string;
@@ -79,9 +79,10 @@ export default function FooterLinking() {
           const data = doc.data();
           const name = data.courseName || data.name || "";
           if (name) {
+            const slug = getCourseSlug({ id: doc.id, ...data }) || doc.id;
             courses.push({
               name: name,
-              url: `course/${doc.id}`,
+              url: `/course/${slug}`,
             });
           }
         });

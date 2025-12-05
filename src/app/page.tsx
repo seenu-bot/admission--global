@@ -65,12 +65,19 @@ function getShortForm(courseName: string): string {
     return abbrevMatch[1];
   }
   
-  // Fallback: return first 10 characters if name is too long
-  if (name.length > 15) {
-    return name.substring(0, 15) + "...";
+  // If the name starts with "Bachelor of" or "Master of" and we didn't find a match,
+  // return empty string to filter it out
+  if (/^(Bachelor|Master) of /i.test(name)) {
+    return "";
   }
   
+  // If name is already short (10 chars or less), return it as is
+  if (name.length <= 10) {
   return name;
+  }
+  
+  // Otherwise, return empty string to filter out long names
+  return "";
 }
 
 export default function Home() {
@@ -103,8 +110,23 @@ const [popularCourses, setPopularCourses] = useState<
           if (!courseName || !courseName.trim()) return;
           
           const shortForm = getShortForm(courseName);
+          
+          // Filter out courses without valid short forms
+          if (!shortForm || shortForm.trim() === "") return;
+          
           const slug =
             (typeof data.slug === "string" && data.slug.trim()) || slugifyCourseName(courseName);
+          
+          // Additional validation: short forms should be:
+          // - Max 10 characters (to catch "B.Pharm", "M.Pharm", etc.)
+          // - No ellipsis (...)
+          // - Not the same as the original course name (unless it's already short)
+          const isShortForm = 
+            shortForm.length <= 10 &&
+            !shortForm.includes("...") &&
+            (shortForm.length < courseName.length || courseName.length <= 10);
+          
+          if (!isShortForm) return;
           
           // Use short form as key to remove duplicates
           if (!coursesMap.has(shortForm)) {
@@ -167,7 +189,8 @@ const [popularCourses, setPopularCourses] = useState<
           <div className="wrap_of_input">
             <div className="CS_tagline">
               <h1>
-                Discover and Find the <span className="strikethrough">Best</span> <span>Right</span> College
+                Discover and Find the <br />
+                <s>Best</s> <p>Right</p> College
               </h1>
             </div>
 
@@ -187,8 +210,8 @@ const [popularCourses, setPopularCourses] = useState<
                     const courseHref = course.slug ? `/course/${course.slug}` : `/course/${course.id}`;
                     return (
                       <a key={course.id} href={courseHref} title={course.name}>
-                        {course.shortForm}
-                      </a>
+                      {course.shortForm}
+                    </a>
                     );
                   })
                 ) : (

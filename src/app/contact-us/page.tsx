@@ -4,6 +4,8 @@ import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FooterLinking from "@/components/FooterLinking";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "@/firebase/firebase";
 
 export default function ContactUsPage() {
   const [formData, setFormData] = useState({
@@ -12,21 +14,61 @@ export default function ContactUsPage() {
     email: "",
     query: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<{ type: "success" | "error" | ""; message: string }>({
+    type: "",
+    message: "",
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+    // Clear status message when user starts typing
+    if (submitStatus.message) {
+      setSubmitStatus({ type: "", message: "" });
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log("Form submitted:", formData);
-    // You can add API call or form handling logic here
-    alert("Thank you for contacting us! We'll get back to you within 24 hours.");
-    setFormData({ name: "", mobile: "", email: "", query: "" });
+    setIsSubmitting(true);
+    setSubmitStatus({ type: "", message: "" });
+
+    try {
+      const payload = {
+        name: formData.name.trim(),
+        mobile: formData.mobile.trim(),
+        email: formData.email.trim(),
+        query: formData.query.trim(),
+        source: "contact_us_page",
+        createdAt: serverTimestamp(),
+      };
+
+      await addDoc(collection(db, "contact us"), payload);
+
+      setSubmitStatus({
+        type: "success",
+        message: "Thank you for contacting us! We'll get back to you within 24 hours.",
+      });
+
+      // Reset form
+      setFormData({ name: "", mobile: "", email: "", query: "" });
+
+      // Clear success message after 5 seconds
+      setTimeout(() => {
+        setSubmitStatus({ type: "", message: "" });
+      }, 5000);
+    } catch (error) {
+      console.error("Error saving contact form data:", error);
+      setSubmitStatus({
+        type: "error",
+        message: "Something went wrong. Please try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -57,6 +99,19 @@ export default function ContactUsPage() {
               <p className="text-gray-600 text-xs mb-4 italic">
                 *Fill all the fields and Let us reply you back within 24hrs.
               </p>
+
+              {/* Status Message */}
+              {submitStatus.message && (
+                <div
+                  className={`mb-4 p-3 rounded-lg text-sm ${
+                    submitStatus.type === "success"
+                      ? "bg-green-50 text-green-800 border border-green-200"
+                      : "bg-red-50 text-red-800 border border-red-200"
+                  }`}
+                >
+                  {submitStatus.message}
+                </div>
+              )}
               
               <form onSubmit={handleSubmit} className="space-y-3">
                 <div>
@@ -124,9 +179,12 @@ export default function ContactUsPage() {
 
                 <button
                   type="submit"
-                  className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors duration-200 text-sm"
+                  disabled={isSubmitting}
+                  className={`w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors duration-200 text-sm ${
+                    isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                 >
-                  Let&apos;s Connect
+                  {isSubmitting ? "Submitting..." : "Let's Connect"}
                 </button>
               </form>
             </div>
