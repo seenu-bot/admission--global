@@ -4586,6 +4586,19 @@ form .select_searchbox .search_list li {
     border-radius: 6px;
     transition: all 0.3s ease;
     /* smooth hover effect */
+    font-size: 1rem;
+    /* default font size */
+}
+
+/* Dynamic font sizing for long course names */
+.course_name[data-length="long"] {
+    font-size: 0.75rem;
+    line-height: 1.2;
+}
+
+.course_name[data-length="very-long"] {
+    font-size: 0.7rem;
+    line-height: 1.15;
 }
 
 
@@ -5133,6 +5146,69 @@ form .select_searchbox .search_list li {
 
     .scholarship_btn_follow,
     .scholarship_btn_details {
+        width: 100%;
+    }
+}
+
+/* Job Listing Third Info Buttons */
+.listing_third_info {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #f1f1f1;
+}
+
+.listing_third_info .info_and_cta {
+    flex: 1;
+}
+
+.listing_third_info .info_and_cta a {
+    display: block;
+    text-align: center;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+/* More Details and Follow buttons - white background, brown border */
+.listing_third_info .info_and_cta:first-child a,
+.listing_third_info .info_and_cta:nth-child(2) a {
+    background: #fff;
+    border: 1px solid #A03318;
+    color: #A03318;
+}
+
+.listing_third_info .info_and_cta:first-child a:hover,
+.listing_third_info .info_and_cta:nth-child(2) a:hover {
+    background: #fff;
+    border-color: #8b2a14;
+    color: #8b2a14;
+}
+
+/* Apply Now button - solid brown background */
+.listing_third_info .info_and_cta:last-child a {
+    background: #A03318;
+    border: 1px solid #A03318;
+    color: #fff;
+}
+
+.listing_third_info .info_and_cta:last-child a:hover {
+    background: #8b2a14;
+    border-color: #8b2a14;
+    color: #fff;
+}
+
+@media (max-width: 992px) {
+    .listing_third_info {
+        flex-direction: column;
+    }
+
+    .listing_third_info .info_and_cta a {
         width: 100%;
     }
 }

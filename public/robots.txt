@@ -1,0 +1,20 @@
+# robots.txt for AdmissionGlobal
+User-agent: *
+Allow: /
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /api/
+
+# Allow important pages
+Allow: /colleges
+Allow: /course/
+Allow: /exams
+Allow: /counselling
+Allow: /scholarships
+Allow: /articles
+Allow: /news
+
+# Sitemap location
+Sitemap: https://www.admissionglobal.com/sitemap.xml
+

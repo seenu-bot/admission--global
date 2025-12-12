@@ -192,7 +192,7 @@ export default function Admissionform() {
     }
   }, []);
 
-  // Inject CSS for Apply Now button styling
+  // Inject CSS for Apply Now button styling and table row backgrounds
   useEffect(() => {
     const styleId = 'admission-form-apply-btn-styles';
     if (document.getElementById(styleId)) return;
@@ -231,6 +231,22 @@ export default function Admissionform() {
         text-align: center !important;
         vertical-align: middle !important;
         padding: 16px !important;
+      }
+      /* Ensure consistent table row backgrounds */
+      #collegesTable tbody tr {
+        background-color: #ffffff !important;
+      }
+      #collegesTable tbody tr:nth-child(even) {
+        background-color: #ffffff !important;
+      }
+      #collegesTable tbody tr:nth-child(odd) {
+        background-color: #ffffff !important;
+      }
+      #collegesTable tbody tr:hover {
+        background-color: #f9fafb !important;
+      }
+      #collegesTable tbody tr td {
+        background-color: transparent !important;
       }
       @media (max-width: 768px) {
         .apply-btn {

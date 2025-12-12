@@ -638,7 +638,7 @@ function EngineeringCoursePageContent() {
             <div>
               <h1 className="text-2xl md:text-3xl font-bold">B.Tech / B.E. Colleges Explorer</h1>
               <p className="text-gray-600 mt-1">
-                Pick a city to explore B.Tech colleges. The list updates automatically from your Firestore courses collection.
+                Pick a city to explore B.Tech colleges.
               </p>
             </div>
           </div>

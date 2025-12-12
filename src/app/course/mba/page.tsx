@@ -662,8 +662,7 @@ function MBAExplorerPageContent() {
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">MBA Colleges Explorer</h1>
             <p className="text-gray-600 mt-1">
-              Pick a state or country to explore MBA colleges. The list updates automatically from your
-              Firestore courses collection.
+              Pick a state or country to explore MBA colleges.
             </p>
           </div>
         </div>

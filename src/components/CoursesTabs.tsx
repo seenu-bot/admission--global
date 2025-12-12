@@ -20,7 +20,9 @@ function getCourseShortForm(name?: string): string {
     { pattern: /\bM\.?Sc\b|Master of Science/i, short: "M.Sc" },
     { pattern: /\bB\.?Com\b|Bachelor of Commerce/i, short: "B.Com" },
     { pattern: /\bM\.?Com\b|Master of Commerce/i, short: "M.Com" },
-    { pattern: /\bBCA\b|Bachelor of Computer Applications?/i, short: "BCA" },
+    { pattern: /\bBCA\b|Bachelor of Computer Applications?/i, short: "Bachelor of Computer Applications" },
+    // Generic Bachelor of Computer naming fallback
+    { pattern: /Bachelor of Computer/i, short: "Bachelor of Computer Applications" },
     { pattern: /\bMCA\b|Master of Computer Applications?/i, short: "MCA" },
     { pattern: /\bBDS\b|Bachelor of Dental Surgery/i, short: "BDS" },
   ];
@@ -33,8 +35,7 @@ function getCourseShortForm(name?: string): string {
   const abbrev = n.match(/\b([A-Z]{2,5})\b/);
   if (abbrev) return abbrev[1];
 
-  // If still long, trim to first 18 chars with ellipsis
-  if (n.length > 22) return n.slice(0, 18) + "...";
+  // Return full name without truncation - font size will be adjusted via CSS
   return n;
 }
 
@@ -247,12 +248,24 @@ export default function CoursesTabs() {
                 const courseSlug = getCourseSlug(course) || course.id;
                 const coursePath = `/course/${courseSlug}`;
                 const label = getCourseShortForm(baseName);
+                const displayName = label || course.name || "";
+                const nameLength = displayName.length;
+                const lengthClass = nameLength > 35 ? "very-long" : nameLength > 25 ? "long" : "";
+                
                 return (
                   <div key={course.id} className="explore_course_div">
                     <p className="course_logo"></p>
 
-                    <a href={coursePath} className="course_name">
-                      {label || course.name}
+                    <a 
+                      href={coursePath} 
+                      className="course_name"
+                      data-length={lengthClass}
+                      style={{
+                        fontSize: nameLength > 35 ? '0.7rem' : nameLength > 25 ? '0.75rem' : '1rem',
+                        lineHeight: nameLength > 35 ? '1.15' : nameLength > 25 ? '1.2' : 'inherit'
+                      }}
+                    >
+                      {displayName}
                     </a>
 
                     <div className="course_data_div">

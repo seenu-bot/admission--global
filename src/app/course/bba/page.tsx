@@ -665,8 +665,7 @@ function BBAExplorerPageContent() {
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">BBA Colleges Explorer</h1>
             <p className="text-gray-600 mt-1">
-              Pick a state or country to explore BBA colleges. The list updates automatically from your
-              Firestore courses collection.
+              Pick a state or country to explore BBA colleges.
             </p>
           </div>
         </div>

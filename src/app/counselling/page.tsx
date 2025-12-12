@@ -226,9 +226,12 @@ export default function Counselling() {
           (match, attrs) => {
             // Replace open-modal with open-counselling-modal in the class attribute
             const newAttrs = attrs.replace(/class="([^"]*)open-modal([^"]*)"/, 'class="$1open-counselling-modal$2"');
-            return `<a${newAttrs} data-leadcta="counselling_cta" data-head="Counselling" data-logo="https://www.collegesearch.in/build/assets/counselling_icon-D09RxFYt.svg">Schedule Now</a>`;
+            return `<a${newAttrs} data-leadcta="counselling_cta" data-head="Counselling" data-logo="https://www.CollegeSearch.in/build/assets/counselling_icon-D09RxFYt.svg">Schedule Now</a>`;
           }
         );
+        
+        // Swap visible brand text while leaving domains/paths intact
+        data = data.replace(/(?<![./])CollegeSearch(?![\\w-])/g, 'AdmissionGlobal');
         
         setHtmlTemplate(data);
       })
@@ -280,7 +283,7 @@ export default function Counselling() {
                 ${description ? `<b>${description}</b>` : ''}
                 <a href="javascript:void(0)" class="open-counselling-modal trackCTA"
                    data-leadcta="counselling_cta" data-head="Counselling"
-                   data-logo="https://www.collegesearch.in/build/assets/counselling_icon-D09RxFYt.svg">
+                   data-logo="https://www.CollegeSearch.in/build/assets/counselling_icon-D09RxFYt.svg">
                   Contact Now
                 </a>
               </div>
@@ -314,7 +317,7 @@ export default function Counselling() {
               </div>
               <a href="javascript:void(0)" class="open-counselling-modal trackCTA"
                  data-leadcta="counselling_cta" data-head="Counselling"
-                 data-logo="https://www.collegesearch.in/build/assets/counselling_icon-D09RxFYt.svg"
+                 data-logo="https://www.CollegeSearch.in/build/assets/counselling_icon-D09RxFYt.svg"
                  data-course="${name}">
                 Contact Now
               </a>
@@ -347,7 +350,7 @@ export default function Counselling() {
               <span>${course}</span>
               <a href="javascript:void(0)" class="open-counselling-modal trackCTA"
                  data-leadcta="counselling_cta" data-head="Counselling"
-                 data-logo="https://www.collegesearch.in/build/assets/counselling_icon-D09RxFYt.svg"
+                 data-logo="https://www.CollegeSearch.in/build/assets/counselling_icon-D09RxFYt.svg"
                  data-course="${course}">
                 Contact Now
               </a>
@@ -539,7 +542,7 @@ export default function Counselling() {
   }, [htmlContent]);
 
   return (
-    <main className="min-h-screen bg-gray-50 page-counselling">
+    <main className="min-h-screen bg-white page-counselling">
       <Header />
 
       {/* Render HTML once loaded */}

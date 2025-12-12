@@ -23,7 +23,7 @@ export default function TermsAndConditionsPage() {
           <div className="space-y-8 text-gray-700 text-base md:text-lg leading-relaxed">
             {/* Introduction */}
             <p>
-              This website www.collegesearch.in (hereinafter referred to as "Website") is operated and owned by 'SET Education Pvt Ltd'. We are committed to respecting your online privacy and we recognize your need for protection of any personally identifiable information ("Personal Information") that you share with us. In general, you can visit the website without telling us who you are or revealing any Personal Information.
+              This website www.CollegeSearch.in (hereinafter referred to as "Website") is operated and owned by 'SET Education Pvt Ltd'. We are committed to respecting your online privacy and we recognize your need for protection of any personally identifiable information ("Personal Information") that you share with us. In general, you can visit the website without telling us who you are or revealing any Personal Information.
             </p>
 
             <p>
@@ -120,7 +120,7 @@ export default function TermsAndConditionsPage() {
                   To the extent possible, we provide you with the option of not divulging any specific information that you wish for us not to collect, store or use. You may also choose not to use a particular service or feature on the Website and opt-out of any non-essential communications from the Website.
                 </p>
                 <p>
-                  You may withdraw your consent given for collecting any information and personal data under this Privacy Policy and pursuant to use of the Website, at any time by sending an email to grievance@collegesearch.in. In such an event, the Company reserves the right to not allow you further usage of the Website or provide/use any services thereunder, without any obligations or liability, whatsoever, whether in contract, tort, law, equity or otherwise, in this regard.
+                  You may withdraw your consent given for collecting any information and personal data under this Privacy Policy and pursuant to use of the Website, at any time by sending an email to grievance@CollegeSearch.in. In such an event, the Company reserves the right to not allow you further usage of the Website or provide/use any services thereunder, without any obligations or liability, whatsoever, whether in contract, tort, law, equity or otherwise, in this regard.
                 </p>
               </div>
             </div>
@@ -138,7 +138,7 @@ export default function TermsAndConditionsPage() {
                   <p className="font-semibold mb-2">The Grievance Officer</p>
                   <p className="mb-1">Anmol Jain</p>
                   <p className="mb-1">AVP - Product Management</p>
-                  <p>Address: Tower B Unitech Cyber Park Gurgaon | Email: <a href="mailto:grievance@collegesearch.in" className="text-orange-500 hover:text-orange-600 hover:underline">grievance@collegesearch.in</a></p>
+                  <p>Address: Tower B Unitech Cyber Park Gurgaon | Email: <a href="mailto:grievance@CollegeSearch.in" className="text-orange-500 hover:text-orange-600 hover:underline">grievance@CollegeSearch.in</a></p>
                 </div>
               </div>
             </div>
@@ -216,7 +216,7 @@ export default function TermsAndConditionsPage() {
               </h2>
               <div className="space-y-4">
                 <p>
-                  If you have any questions about this Privacy Policy, please contact us by email at <a href="mailto:info@admissionglobal.in" className="text-orange-500 hover:text-orange-600 hover:underline">info@admissionglobal.in</a>.
+                  If you have any questions about this Privacy Policy, please contact us by email at <a href="mailto:info@CollegeSearch.in" className="text-orange-500 hover:text-orange-600 hover:underline">info@CollegeSearch.in</a>.
                 </p>
                 <p>
                   By accessing the Website or placing an order or sending any information, you are communicating with the Company electronically and you agree to receive communications (including transactional, promotional and/or commercial messages) from the Company periodically and as and when required. We may communicate with you by e-mail, SMS, phone call or by posting notices on the Website or by any other mode of communication.

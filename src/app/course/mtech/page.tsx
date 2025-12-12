@@ -828,8 +828,7 @@ function MTechExplorerPageContent() {
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">M.Tech / M.E. Colleges Explorer</h1>
             <p className="text-gray-600 mt-1">
-              Pick a state or country to explore M.Tech colleges. The list updates automatically from your
-              Firestore courses collection.
+              Pick a state or country to explore M.Tech colleges.
             </p>
           </div>
         </div>

@@ -470,8 +470,7 @@ function MbbsExplorerPageContent() {
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">MBBS Colleges Explorer</h1>
             <p className="text-gray-600 mt-1">
-              Select a city or country to view MBBS colleges. Data updates automatically from your
-              Firestore database.
+              Select a city or country to view MBBS colleges.
             </p>
           </div>
           <div className="flex gap-2 bg-white border rounded-full p-1 shadow-sm">
@@ -642,18 +641,30 @@ function MbbsExplorerPageContent() {
                             </div>
                             <div className="text-xs text-gray-400 mt-1">{college.country}</div>
                           </div>
-                          <div className="flex flex-col items-start text-sm text-gray-600 gap-1">
-                            {rating && (
-                              <div>
-                                <span className="font-semibold text-gray-900">{rating.toFixed(2)}</span> Rating
-                              </div>
-                            )}
-                            {totalCourses && (
-                              <div>{totalCourses} Courses</div>
-                            )}
-                            {packageFee && (
-                              <div className="text-red-700 font-medium">{packageFee}</div>
-                            )}
+                          <div className="flex flex-col items-end gap-3">
+                            <Link
+                              href={
+                                college.sourceCollection === "colleges"
+                                  ? `/colleges/${college.slug || college.sourceId || college.id}`
+                                  : `/course/college/${college.slug || college.sourceId || college.id}`
+                              }
+                              className="text-sm font-semibold text-red-700 hover:underline whitespace-nowrap"
+                            >
+                              View College
+                            </Link>
+                            <div className="flex flex-col items-end text-sm text-gray-600 gap-1">
+                              {rating && (
+                                <div>
+                                  <span className="font-semibold text-gray-900">{rating.toFixed(2)}</span> Rating
+                                </div>
+                              )}
+                              {totalCourses && (
+                                <div>{totalCourses} Courses</div>
+                              )}
+                              {packageFee && (
+                                <div className="text-red-700 font-medium">{packageFee}</div>
+                              )}
+                            </div>
                           </div>
                         </div>
 
@@ -697,18 +708,7 @@ function MbbsExplorerPageContent() {
 
                         <div className="flex flex-wrap justify-between items-center gap-3 pt-2">
                           <div className="text-xs text-gray-500">
-                            Data updates automatically from your Firestore collection.
                           </div>
-                          <Link
-                            href={
-                              college.sourceCollection === "colleges"
-                                ? `/colleges/${college.slug || college.sourceId || college.id}`
-                                : `/course/college/${college.slug || college.sourceId || college.id}`
-                            }
-                            className="text-sm font-semibold text-red-700 hover:underline"
-                          >
-                            View College
-                          </Link>
                         </div>
                       </div>
                     </div>

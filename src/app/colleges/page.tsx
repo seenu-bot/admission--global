@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import Header from "@/components/Header";
@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import { db } from "@/firebase/firebase";
 import { collection, onSnapshot, query } from "firebase/firestore";
 import { getCollegeSlug } from "@/lib/slugify";
+import { slugToCourseName } from "@/lib/courses";
 
 type College = {
   id: string;
@@ -70,12 +71,39 @@ function isValidImageUrl(url: string | undefined): boolean {
   return false;
 }
 
-export default function CollegesPage() {
+function CollegesPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [colleges, setColleges] = useState<College[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCourse, setSelectedCourse] = useState("");
+
+  // Preselect course from query param (?course=...) or default to MBBS
+  useEffect(() => {
+    const courseParam = searchParams.get("course");
+    if (courseParam) {
+      const decoded = decodeURIComponent(courseParam);
+      const courseName = slugToCourseName[decoded] || decoded;
+      
+      // Check if this is the excluded long medical course
+      const isLongMedicalCourse = 
+        courseName.length > 100 &&
+        /Anatomy.*Physiology.*Biochemistry.*Pathology/i.test(courseName) &&
+        /Forensic Medicine.*Community Medicine/i.test(courseName) &&
+        /Otorhinolaryngology/i.test(courseName);
+      
+      if (!isLongMedicalCourse) {
+        setSelectedCourse(courseName);
+      } else {
+        // If excluded course, default to MBBS
+        setSelectedCourse("MBBS");
+      }
+    } else {
+      // No course param - default to MBBS
+      setSelectedCourse("MBBS");
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const collegesQ = query(collection(db, "colleges"));
@@ -181,11 +209,26 @@ export default function CollegesPage() {
 
   const courses = useMemo(() => {
     const allCourses = new Set<string>();
+    
     colleges.forEach((college) => {
       if (college.coursesOffered && Array.isArray(college.coursesOffered)) {
         college.coursesOffered.forEach((course) => {
           if (course && typeof course === "string" && course.trim()) {
-            allCourses.add(course.trim());
+            const trimmedCourse = course.trim();
+            
+            // Filter out the long course name - check for key medical terms together
+            const isLongMedicalCourse = 
+              trimmedCourse.length > 100 && // Very long course name
+              /Anatomy.*Physiology.*Biochemistry.*Pathology/i.test(trimmedCourse) &&
+              /Forensic Medicine.*Community Medicine/i.test(trimmedCourse) &&
+              /Otorhinolaryngology/i.test(trimmedCourse);
+            
+            // Also filter out if it contains too many medical specialties in sequence
+            const medicalTermsCount = (trimmedCourse.match(/\b(Anatomy|Physiology|Biochemistry|Pathology|Pharmacology|Microbiology|Forensic|Community|Medicine|surgery|Obst|Gynae|Paediatrics|Dermatology|Psychiatry|Cardiology|Physical|Neuromedicine|Nephrology|ophthalmology|Otorhinolaryngology)\b/gi) || []).length;
+            
+            if (!isLongMedicalCourse && medicalTermsCount < 10) {
+              allCourses.add(trimmedCourse);
+            }
           }
         });
       }
@@ -242,10 +285,37 @@ export default function CollegesPage() {
   }, [selectedCourse, searchTerm]);
 
   const handleSelectCourse = (course: string) => {
+    // Check if this is the excluded long medical course
+    const isLongMedicalCourse = 
+      course.length > 100 &&
+      /Anatomy.*Physiology.*Biochemistry.*Pathology/i.test(course) &&
+      /Forensic Medicine.*Community Medicine/i.test(course) &&
+      /Otorhinolaryngology/i.test(course);
+    
+    // Don't allow selection of excluded course
+    if (isLongMedicalCourse) {
+      return;
+    }
+    
     const newCourse = course === selectedCourse ? "" : course;
     setSelectedCourse(newCourse);
     setCurrentPage(1);
   };
+  
+  // Clear selection if excluded course is currently selected
+  useEffect(() => {
+    if (selectedCourse) {
+      const isLongMedicalCourse = 
+        selectedCourse.length > 100 &&
+        /Anatomy.*Physiology.*Biochemistry.*Pathology/i.test(selectedCourse) &&
+        /Forensic Medicine.*Community Medicine/i.test(selectedCourse) &&
+        /Otorhinolaryngology/i.test(selectedCourse);
+      
+      if (isLongMedicalCourse) {
+        setSelectedCourse("");
+      }
+    }
+  }, [selectedCourse]);
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -512,6 +582,24 @@ export default function CollegesPage() {
 
       <Footer />
     </main>
+  );
+}
+
+export default function CollegesPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="container mx-auto px-4 py-10">
+          <div className="flex justify-center items-center py-20">
+            <div className="w-10 h-10 border-4 border-red-700 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        </div>
+        <Footer />
+      </main>
+    }>
+      <CollegesPageContent />
+    </Suspense>
   );
 }
 

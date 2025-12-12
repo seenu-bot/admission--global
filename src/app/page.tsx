@@ -33,7 +33,7 @@ function getShortForm(courseName: string): string {
     { pattern: /\b(M\.?Tech|M\.?E\.?|Master of Technology|Master of Engineering)\b/i, short: "M.Tech" },
     { pattern: /\b(MBA|Master of Business Administration)\b/i, short: "MBA" },
     { pattern: /\b(BBA|Bachelor of Business Administration)\b/i, short: "BBA" },
-    { pattern: /\b(BCA|Bachelor of Computer Applications)\b/i, short: "BCA" },
+    { pattern: /\b(BCA|Bachelor of Computer Applications)\b/i, short: "Bachelor of Computer Applications" },
     { pattern: /\b(MCA|Master of Computer Applications)\b/i, short: "MCA" },
     { pattern: /\b(MBBS|Bachelor of Medicine.*Bachelor of Surgery)\b/i, short: "MBBS" },
     { pattern: /\b(B\.?Sc|Bachelor of Science)\b/i, short: "B.Sc" },
@@ -207,20 +207,62 @@ const [popularCourses, setPopularCourses] = useState<
                   <span className="text-gray-500">Loading courses...</span>
                 ) : popularCourses.length > 0 ? (
                   popularCourses.map((course) => {
-                    const courseHref = course.slug ? `/course/${course.slug}` : `/course/${course.id}`;
+                    const short = (course.shortForm || "").toLowerCase();
+                    const isBtech = short === "b.tech";
+                    const isBsc = short === "b.sc";
+                    const isMtech = short === "m.tech";
+                    const isBba = short === "bba";
+                    const isMba = short === "mba";
+                    const isMbbs = short === "mbbs";
+                    const courseParam = isBtech
+                      ? encodeURIComponent("B.Tech in Computer Science and Engineering")
+                      : isBsc
+                      ? encodeURIComponent("B.Sc Nursing")
+                      : isMtech
+                      ? encodeURIComponent("M.Tech")
+                      : isBba
+                      ? encodeURIComponent("BBA")
+                      : isMba
+                      ? encodeURIComponent("MBA")
+                      : isMbbs
+                      ? encodeURIComponent("MBBS")
+                      : encodeURIComponent(course.shortForm || course.name || course.slug || "");
+                    const courseHref = `/colleges?course=${courseParam}`;
                     return (
                       <a key={course.id} href={courseHref} title={course.name}>
-                      {course.shortForm}
-                    </a>
+                        {course.shortForm}
+                      </a>
                     );
                   })
                 ) : (
                   // Fallback to default courses if no data
-                  ['B.tech','B.Sc','B.com','BBA','BCA','BA','MBA','LLB','MCA','B.Pharm'].map((course, idx) => (
-                  <a key={idx} href={`${course.toLowerCase().replace('.', '')}-colleges-india.html`}>
+                  ['B.Tech','B.Sc','B.Com','BBA','BCA','BA','MBA','LLB','MCA','B.Pharm','M.Tech'].map((course, idx) => {
+                    const lower = course.toLowerCase();
+                    const isBtech = lower === "b.tech";
+                    const isBsc = lower === "b.sc";
+                    const isMtech = lower === "m.tech";
+                    const isBba = lower === "bba";
+                    const isMba = lower === "mba";
+                    const isMbbs = lower === "mbbs";
+                    const courseParam = isBtech
+                      ? encodeURIComponent("B.Tech in Computer Science and Engineering")
+                      : isBsc
+                      ? encodeURIComponent("B.Sc Nursing")
+                      : isMtech
+                      ? encodeURIComponent("M.Tech")
+                      : isBba
+                      ? encodeURIComponent("BBA")
+                      : isMba
+                      ? encodeURIComponent("MBA")
+                      : isMbbs
+                      ? encodeURIComponent("MBBS")
+                      : encodeURIComponent(course);
+                    return (
+                      <a key={idx} href={`/colleges?course=${courseParam}`}>
                     {course}
                   </a>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </div>

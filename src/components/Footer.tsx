@@ -28,15 +28,15 @@ export default function Footer() {
                     <a target="_blank" href="https://www.facebook.com/CollegeSearch?fref=ts"
                         className="fb_footer">facebook</a>
                     <a target="_blank" href="https://twitter.com/india_colleges" className="twitter_footer">twitter</a>
-                    <a target="_blank" href="https://www.linkedin.com/school/indiacollegesearch/"
+                    <a target="_blank" href="https://www.linkedin.com/school/indiaCollegeSearch/"
                         className="linkedin_footer">linkedin</a>
-                    <a target="_blank" href="https://www.instagram.com/collegesearch_in/"
+                    <a target="_blank" href="https://www.instagram.com/CollegeSearch_in/"
                         className="instagram_footer">instagram</a>
                 </div>
 
                 <div className="CS_contact_details">
                     <a href="tel:+919228151258">+9192281 51258</a>
-                    <a href="mailto:info@admissionglobal.in">info@admissionglobal.in</a>
+                    <a href="mailto:info@CollegeSearch.in">info@CollegeSearch.in</a>
                 </div>
 
                 <div className="CS_footer_link">

@@ -234,10 +234,10 @@ export default function ContactUsPage() {
                   <p className="text-gray-700 text-base md:text-lg">
                     <strong>Email:</strong>{" "}
                     <a 
-                      href="mailto:info@admissionglobal.in" 
+                      href="mailto:info@CollegeSearch.in" 
                       className="text-orange-500 hover:text-orange-600 hover:underline"
                     >
-                      info@admissionglobal.in
+                      info@CollegeSearch.in
                     </a>
                   </p>
                   <p className="text-gray-700 text-base md:text-lg">

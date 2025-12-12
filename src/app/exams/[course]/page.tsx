@@ -78,7 +78,7 @@ function getCourseShortForm(name?: string): string {
     { pattern: /\bM\.?Sc\b|Master of Science/i, short: "M.Sc" },
     { pattern: /\bB\.?Com\b|Bachelor of Commerce/i, short: "B.Com" },
     { pattern: /\bM\.?Com\b|Master of Commerce/i, short: "M.Com" },
-    { pattern: /\bBCA\b|Bachelor of Computer Applications?/i, short: "BCA" },
+    { pattern: /\bBCA\b|Bachelor of Computer Applications?/i, short: "Bachelor of Computer Applications" },
     { pattern: /\bMCA\b|Master of Computer Applications?/i, short: "MCA" },
     { pattern: /\bBDS\b|Bachelor of Dental Surgery/i, short: "BDS" },
   ];
@@ -91,8 +91,7 @@ function getCourseShortForm(name?: string): string {
   const abbrev = n.match(/\b([A-Z]{2,5})\b/);
   if (abbrev) return abbrev[1];
 
-  // If still long, trim to first 18 chars with ellipsis
-  if (n.length > 22) return n.slice(0, 18) + "...";
+  // Return full name without truncation - font size will be adjusted via CSS
   return n;
 }
 
@@ -281,8 +280,9 @@ export default function ExamsByCourse({ params }: { params: Promise<{ course: st
   }, [combinedExams, course, resolvedCourseName]);
  
    const headingText = useMemo(() => {
+    if (course === "overall") return "Entrance Exams - 2025";
      if (course === "pe") return "PE-related Entrance Exams";
-    return resolvedCourseName ? `${resolvedCourseName} Entrance Exams` : "Entrance Exams";
+    return resolvedCourseName ? `${resolvedCourseName} Entrance Exams` : "Entrance Exams - 2025";
   }, [course, resolvedCourseName]);
 
   const courseOptions = useMemo(() => {
@@ -308,42 +308,67 @@ export default function ExamsByCourse({ params }: { params: Promise<{ course: st
        <Header />
  
         <div className="container common_listing_wrapper" id="exam_listing_wrapper">
-         <h1>{headingText}</h1>
+        <nav className="common_breadcrumb flex items-center gap-2 text-sm text-gray-600" aria-label="Breadcrumb">
+          <Link href="/" className="text-gray-900 hover:text-gray-900">Home</Link>
+          <span aria-hidden="true">›</span>
+          <Link href="/exams/overall" className="text-red-600 hover:text-red-600">Exams</Link>
+          {course !== "overall" && course !== "exams.html" && (
+            <>
+              <span aria-hidden="true">›</span>
+              <span className="text-gray-800">{resolvedCourseName}</span>
+            </>
+          )}
+        </nav>
+
+        <div className="mt-3 mb-6">
+          <h1 className="text-3xl font-bold text-gray-900">{headingText}</h1>
+          <p className="text-gray-700 mt-2">
+            There are various recognised Boards and Councils in India that are responsible for regulating and
+            overseeing different aspects of education in the country.
+          </p>
+        </div>
  
         <div className="main_listing_wrapper">
-           {/* Left Filter - Course selector */}
-           <div id="listing_filter_wrapper">
-             <div className="fileter_closer">
-              <span aria-hidden="true"></span>
-               <span className="close_filter"></span>
-             </div>
-             <div className="listing_filter_parent">
-               <div className="listing_filter_div">
-                 <p className="filter_type">Course</p>
+          {/* Left Filter - Course selector (flat container, keep inner card) */}
+          <div className="w-full max-w-[240px] bg-transparent border-0 shadow-none p-0">
+            <div className="space-y-3">
+              <p className="text-sm font-semibold text-gray-800 uppercase tracking-wide">Course</p>
                  <div className="search_box accordion_wrap">
-                   <div className="accordion_div active">
-                     <p className="accordion">Select or Search Course</p>
-                     <div className="panel">
-                       <div className="search_wrapper">
-                         <input type="text" placeholder="Search" className="filterSearchText" />
-                         <div className="search_data">
-                            <div className="filterUrlDiv examFilterUrl search_list">
+                <div className="accordion_div active bg-white border border-gray-200 rounded-2xl shadow-[0_12px_35px_rgba(0,0,0,0.05)]">
+                  <p
+                    className="accordion flex items-center justify-start px-4 py-3 text-gray-900 font-semibold text-xs leading-none"
+                    style={{ fontSize: "12px" }}
+                  >
+                    Select or Search Course
+                  </p>
+                  <div className="panel px-4 pb-4">
+                    <div className="search_wrapper space-y-3">
+                      <input
+                        type="text"
+                        placeholder="Search"
+                        className="filterSearchText w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-red-400"
+                      />
+                      <div className="search_data max-h-72 overflow-y-auto pr-1 custom-scrollbar">
+                         <div className="filterUrlDiv examFilterUrl search_list space-y-2">
                              {courseOptions.map((option) => (
-                               <div key={option.slug} className="radio_input">
-                                 <label>
+                            <div
+                              key={option.slug}
+                              className="radio_input flex items-center gap-3 text-gray-900 text-sm hover:bg-gray-50 px-2 py-2 rounded-lg"
+                            >
+                              <label className="flex items-center gap-3 cursor-pointer w-full">
                                    <input
                                      type="radio"
                                      name="course"
+                                  className="accent-red-500 w-4 h-4"
                                      checked={option.slug === course}
                                      onChange={() => {
                                        if (option.slug) window.location.href = `/exams/${option.slug}`;
                                      }}
                                    />
-                                   {option.name}
+                                <span>{option.name}</span>
                                  </label>
                                </div>
                              ))}
-                           </div>
                          </div>
                        </div>
                      </div>

@@ -23,7 +23,7 @@ export default function PrivacyPolicyPage() {
           <div className="space-y-8 text-gray-700 text-base md:text-lg leading-relaxed">
             {/* Introduction */}
             <p>
-              This website www.collegesearch.in (hereinafter referred to as "Website") is operated and owned by 'SET Education Pvt Ltd'. We are committed to respecting your online privacy and we recognize your need for protection of any personally identifiable information ("Personal Information") that you share with us. In general, you can visit the website without telling us who you are or revealing any Personal Information. This privacy policy sets forth what information we collect from and/or about you and how we use this information.
+              This website www.CollegeSearch.in (hereinafter referred to as "Website") is operated and owned by 'SET Education Pvt Ltd'. We are committed to respecting your online privacy and we recognize your need for protection of any personally identifiable information ("Personal Information") that you share with us. In general, you can visit the website without telling us who you are or revealing any Personal Information. This privacy policy sets forth what information we collect from and/or about you and how we use this information.
             </p>
 
             {/* Information from Cookies etc */}

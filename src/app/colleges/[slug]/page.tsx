@@ -1337,13 +1337,7 @@ export default function CollegeDetailsPage({ params }: { params: Promise<{ slug:
               >
                 Register
               </button>
-              <div className="text-center text-sm text-gray-500">OR</div>
-              <button
-                type="button"
-                className="w-full rounded-2xl border border-gray-200 py-3 text-sm font-semibold text-gray-700 hover:border-gray-400 transition"
-              >
-                Continue with Google
-              </button>
+              {/* Google sign-in hidden */}
               <p className="text-center text-xs text-gray-500">
                 By submitting, you accept our Terms, Privacy Policy and consent to SMS updates.
               </p>

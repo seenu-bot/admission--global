@@ -2,7 +2,7 @@
 
 export const contactDetails = [
   { href: "tel:+919228151258", label: "+91 92281 51258" },
-  { href: "mailto:info@admissionglobal.in", label: "info@admissionglobal.in" },
+  { href: "mailto:info@CollegeSearch.in", label: "info@CollegeSearch.in" },
 ];
 
 export const navigationLinks = [
@@ -18,8 +18,8 @@ export const navigationLinks = [
 export const socialLinks = [
   { href: "https://www.facebook.com/CollegeSearch?fref=ts", className: "facebook" },
   { href: "https://twitter.com/india_colleges", className: "twitter" },
-  { href: "https://www.linkedin.com/school/indiacollegesearch", className: "linkedin" },
-  { href: "https://www.instagram.com/collegesearch_in/", className: "instagram" },
+  { href: "https://www.linkedin.com/school/indiaCollegeSearch", className: "linkedin" },
+  { href: "https://www.instagram.com/CollegeSearch_in/", className: "instagram" },
 ];
 
 export const headerData = {

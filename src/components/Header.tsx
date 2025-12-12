@@ -1404,11 +1404,6 @@ export default function Header() {
                                     {college.city ? `, ${college.city}` : ''}
                                   </Link>
                                 ))}
-                                {paramedicalColleges.length > 6 && (
-                                  <Link href="/course?category=paramedical" className="view_more_link">
-                                    View more ›
-                                  </Link>
-                                )}
                               </>
                             )}
 
@@ -1453,9 +1448,6 @@ export default function Header() {
                                 {`MBBS Colleges in ${city}`}
                               </Link>
                             ))}
-                            <Link href={`/course/mbbs?scope=india`} className="view_more_link">
-                              View more &rsaquo;
-                            </Link>
                           </div>
                           <div className="type_of_navigation_wrap">
                             <p>MBBS Colleges in Abroad</p>
@@ -1464,9 +1456,6 @@ export default function Header() {
                                 {`MBBS in ${country}`}
                               </Link>
                             ))}
-                            <Link href={`/course/mbbs?scope=abroad`} className="view_more_link">
-                              View more &rsaquo;
-                            </Link>
                           </div>
                         </>
                       ) : (
@@ -1502,9 +1491,6 @@ export default function Header() {
                                               {`MBA Colleges in ${location.name}`}
                                             </Link>
                                           ))}
-                                          <Link href={`/course/mba?scope=india`} className="view_more_link">
-                                            View more ›
-                                          </Link>
                                         </div>
                                       );
                                     }
@@ -1539,11 +1525,6 @@ export default function Header() {
                                               {`B.Tech Colleges in ${city}`}
                                             </Link>
                                           ))}
-                                          {btechCities.length > 6 && (
-                                            <Link href={`/course/engineering`} className="view_more_link">
-                                              View more ›
-                                            </Link>
-                                          )}
                                         </div>
                                       );
                                     }
@@ -1565,9 +1546,6 @@ export default function Header() {
                                               {`M.Tech Colleges in ${location.name}`}
                                             </Link>
                                           ))}
-                                            <Link href={`/course/mtech`} className="view_more_link">
-                                              View more ›
-                                            </Link>
                                         </div>
                                       );
                                     }
@@ -1610,9 +1588,6 @@ export default function Header() {
                                           {`MBA Colleges in ${location.name}`}
                                         </Link>
                                       ))}
-                                      <Link href={`/course/mba?scope=india`} className="view_more_link">
-                                        View more ›
-                                      </Link>
                                     </div>
                                   );
                                 }
@@ -1649,11 +1624,6 @@ export default function Header() {
                                           {`B.Tech Colleges in ${city}`}
                                         </Link>
                                       ))}
-                                      {btechCities.length > 6 && (
-                                        <Link href={`/course/engineering`} className="view_more_link">
-                                          View more ›
-                                        </Link>
-                                      )}
                                     </div>
                                   );
                                 }
@@ -1676,9 +1646,6 @@ export default function Header() {
                                           {`M.Tech Colleges in ${location.name}`}
                                         </Link>
                                       ))}
-                                        <Link href={`/course/mtech`} className="view_more_link">
-                                          View more ›
-                                        </Link>
                                     </div>
                                   );
                                 }

@@ -99,7 +99,7 @@ function getShortForm(courseName: string): string {
     { pattern: /\b(B\.?Sc|Bachelor of Science)\b/i, short: "B.Sc" },
     { pattern: /\b(B\.?Com|Bachelor of Commerce)\b/i, short: "B.Com" },
     { pattern: /\b(BBA|Bachelor of Business Administration)\b/i, short: "BBA" },
-    { pattern: /\b(BCA|Bachelor of Computer Applications)\b/i, short: "BCA" },
+    { pattern: /\b(BCA|Bachelor of Computer Applications)\b/i, short: "Bachelor of Computer Applications" },
     { pattern: /\b(BA|Bachelor of Arts)\b/i, short: "BA" },
     { pattern: /\b(MBA|Master of Business Administration)\b/i, short: "MBA" },
     { pattern: /\b(LLB|Bachelor of Laws)\b/i, short: "LLB" },
@@ -120,11 +120,7 @@ function getShortForm(courseName: string): string {
     return abbrevMatch[1];
   }
   
-  // Fallback: return first 10 characters if name is too long
-  if (name.length > 15) {
-    return name.substring(0, 15) + "...";
-  }
-  
+  // Return full name without truncation - font size will be adjusted via CSS if needed
   return name;
 }
 
