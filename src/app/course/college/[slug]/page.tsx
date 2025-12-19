@@ -73,6 +73,58 @@ type CollegeRecord = {
   totalCourses?: string | number;
 };
 
+// Helper to derive short course codes like "MBBS", "B.Tech" from full course names
+function getCourseShortForm(courseName: string): string {
+  if (!courseName) return "";
+
+  const name = courseName.trim();
+
+  const shortFormPatterns = [
+    { pattern: /\b(B\.?Tech|B\.?E\.?|Bachelor of Technology|Bachelor of Engineering)\b/i, short: "B.Tech" },
+    { pattern: /\b(M\.?Tech|M\.?E\.?|Master of Technology|Master of Engineering)\b/i, short: "M.Tech" },
+    { pattern: /\b(MBA|Master of Business Administration)\b/i, short: "MBA" },
+    { pattern: /\b(BBA|Bachelor of Business Administration)\b/i, short: "BBA" },
+    { pattern: /\b(BCA|Bachelor of Computer Applications)\b/i, short: "Bachelor of Computer Applications" },
+    { pattern: /\b(MCA|Master of Computer Applications)\b/i, short: "MCA" },
+    { pattern: /\b(MBBS|Bachelor of Medicine.*Bachelor of Surgery)\b/i, short: "MBBS" },
+    { pattern: /\b(B\.?Sc|Bachelor of Science)\b/i, short: "B.Sc" },
+    { pattern: /\b(M\.?Sc|Master of Science)\b/i, short: "M.Sc" },
+    { pattern: /\b(B\.?Com|Bachelor of Commerce)\b/i, short: "B.Com" },
+    { pattern: /\b(M\.?Com|Master of Commerce)\b/i, short: "M.Com" },
+    { pattern: /\b(BA|Bachelor of Arts)\b/i, short: "BA" },
+    { pattern: /\b(MA|Master of Arts)\b/i, short: "MA" },
+    { pattern: /\b(LLB|Bachelor of Laws)\b/i, short: "LLB" },
+    { pattern: /\b(LLM|Master of Laws)\b/i, short: "LLM" },
+    { pattern: /\b(B\.?Pharm|Bachelor of Pharmacy)\b/i, short: "B.Pharm" },
+    { pattern: /\b(M\.?Pharm|Master of Pharmacy)\b/i, short: "M.Pharm" },
+    { pattern: /\b(B\.?Arch|Bachelor of Architecture)\b/i, short: "B.Arch" },
+    { pattern: /\b(M\.?Arch|Master of Architecture)\b/i, short: "M.Arch" },
+    { pattern: /\b(BDS|Bachelor of Dental Surgery)\b/i, short: "BDS" },
+    { pattern: /\b(BHM|Bachelor of Hotel Management)\b/i, short: "BHM" },
+  ];
+
+  for (const { pattern, short } of shortFormPatterns) {
+    if (pattern.test(name)) {
+      return short;
+    }
+  }
+
+  const abbrevMatch = name.match(/\b([A-Z]{2,5})\b/);
+  if (abbrevMatch && abbrevMatch[1].length >= 2 && abbrevMatch[1].length <= 5) {
+    return abbrevMatch[1];
+  }
+
+  const words = name
+    .split(/\s+/)
+    .filter((w) => w && /^[A-Za-z]/.test(w))
+    .map((w) => w[0].toUpperCase());
+  if (words.length >= 2 && words.length <= 5) {
+    return words.join("");
+  }
+
+  return name.length <= 12 ? name : name.slice(0, 12);
+}
+
 function gatherStrings(input: any): string[] {
   if (!input) return [];
   if (Array.isArray(input)) {
@@ -471,6 +523,7 @@ export default function CourseCollegePage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  const currentYear = new Date().getFullYear();
   const { slug } = use(params);
   const router = useRouter();
   const [college, setCollege] = useState<CollegeRecord | null>(null);
@@ -489,6 +542,7 @@ export default function CourseCollegePage({
     currentCourse: "",
   });
   const [registerStatus, setRegisterStatus] = useState("");
+  const [courseDurations, setCourseDurations] = useState<Record<string, string>>({});
 
   const toggleProgramGroup = (category: string) => {
     setExpandedProgramGroups((prev) => ({
@@ -610,6 +664,38 @@ export default function CourseCollegePage({
       isMounted = false;
     };
   }, [slug, router]);
+
+  // Load generic course durations (e.g. MBBS = 5.5 Years) from `courses` collection
+  useEffect(() => {
+    const fetchCourseDurations = async () => {
+      if (!college) return;
+      try {
+        const snapshot = await getDocs(collection(db, "courses"));
+        const map: Record<string, string> = {};
+
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data() as any;
+          const courseName = (data.courseName || data.name || "").trim();
+          const duration =
+            (data.duration || data.courseDuration || data.durationText || "").toString().trim();
+          if (!courseName || !duration) return;
+
+          const shortForm = getCourseShortForm(courseName);
+          if (!shortForm) return;
+
+          if (!map[shortForm]) {
+            map[shortForm] = duration;
+          }
+        });
+
+        setCourseDurations(map);
+      } catch (error) {
+        console.error("Error fetching course durations:", error);
+      }
+    };
+
+    fetchCourseDurations();
+  }, [college]);
 
   if (redirecting || loading) {
     return (
@@ -874,7 +960,7 @@ export default function CourseCollegePage({
               { id: "info", label: "Info" },
               { id: "courses-fees", label: "Courses & Fees" },
               { id: "cutoff", label: "Cutoff" },
-              { id: "admissions", label: "Admissions 2025" },
+              { id: "admissions", label: `Admissions ${currentYear}` },
               { id: "placements", label: "Placements" },
               { id: "faculty", label: "Faculty" },
               { id: "gallery", label: "Gallery" },
@@ -896,17 +982,17 @@ export default function CourseCollegePage({
           </div>
         </div>
 
-        <section id="courses-fees" className="grid lg:grid-cols-3 gap-6">
+        <section id="courses-fees" className="grid lg:grid-cols-3 gap-6 animate-fade-in-up">
           <div className="lg:col-span-2 space-y-6">
             {description && (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 animate-fade-in">
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">Overview</h3>
                 <p className="text-gray-600 leading-relaxed">{description}</p>
               </div>
             )}
 
             {programEntries.length > 0 && (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6 animate-fade-in-up">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div>
                     <p className="text-sm text-gray-500">{programEntries.length} Programs • {collegeName}</p>
@@ -974,14 +1060,24 @@ export default function CourseCollegePage({
                             );
 
                             return (
-                              <div
-                                key={`${categoryKey}-${program.id}`}
-                                className="flex flex-col gap-4 px-4 py-4 md:flex-row md:items-center md:justify-between"
-                              >
+                                <div
+                                  key={`${categoryKey}-${program.id}`}
+                                  className="flex flex-col gap-4 px-4 py-4 md:flex-row md:items-center md:justify-between animate-card-hover"
+                                >
                                 <div>
                                   <p className="text-sm text-gray-500">
-                                    {program.duration || "2 Years"}{" "}
-                                    {program.level ? `• ${program.level}` : ""}
+                                    {(() => {
+                                      const key =
+                                        getCourseShortForm(program.name) || program.name || "";
+                                      const fromCourses = key ? courseDurations[key] : undefined;
+                                      const durationText = (fromCourses || program.duration || "")
+                                        .toString()
+                                        .trim();
+                                      const metaParts: string[] = [];
+                                      if (durationText) metaParts.push(durationText);
+                                      if (program.level) metaParts.push(program.level);
+                                      return metaParts.join(" • ");
+                                    })()}
                                   </p>
                                   <h5 className="text-lg font-semibold text-gray-900">
                                     {content}
@@ -1006,7 +1102,7 @@ export default function CourseCollegePage({
                                     onClick={() => openRegisterModal("admission", program.name)}
                                     className="px-4 py-2 rounded-full bg-red-700 text-white font-semibold hover:bg-red-800 transition"
                                   >
-                                    Admission 2025
+                                    {`Admission ${currentYear}`}
                                   </button>
                                   <button
                                     onClick={() => openRegisterModal("brochure", program.name)}
@@ -1483,7 +1579,7 @@ export default function CourseCollegePage({
                 ? "Register to Download Brochure"
                 : registerModal.action === "eligibility"
                 ? "Check Eligibility"
-                : "College Admission 2025"}
+                : `College Admission ${currentYear}`}
             </p>
             <h3 className="mt-1 text-2xl font-semibold text-gray-900">{collegeName}</h3>
             <p className="text-sm text-gray-500">

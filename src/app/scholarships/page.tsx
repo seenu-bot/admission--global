@@ -283,7 +283,7 @@ function ScholarshipsPageContent() {
                     </option>
                   ))}
                 </select>
-              </div>
+                    </div>
 
               {/* Location Filter */}
               <div className="listing_filter_div">
@@ -320,12 +320,12 @@ function ScholarshipsPageContent() {
                                     />
                                     <span>{loc}</span>
                                   </label>
-                                </div>
+                  </div>
                               ))}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                  </div>
+                  </div>
+                  </div>
+                  </div>
                     )}
                   </div>
                 </div>
@@ -346,8 +346,8 @@ function ScholarshipsPageContent() {
                         />
                         <span>{level.toUpperCase()}</span>
                       </label>
-                    </div>
-                  ))}
+                </div>
+              ))}
                 </div>
               </div>
             </div>
@@ -395,8 +395,8 @@ function ScholarshipsPageContent() {
               ) : filteredScholarships.length === 0 ? (
                 <div className="listing_data_card" style={{ textAlign: "center", padding: "40px" }}>
                   <p className="text-gray-600">No scholarships found matching your criteria.</p>
-                </div>
-              ) : (
+            </div>
+          ) : (
                 filteredScholarships.map((scholarship) => {
                   const scholarshipTitle = scholarship.title || scholarship.name || "Scholarship";
                   const organization = scholarship.organization || "—";
@@ -417,14 +417,14 @@ function ScholarshipsPageContent() {
                           <strong className="shortform">{organization}</strong>
                         </div>
                         {scholarship.logo ? (
-                          <Image
-                            src={scholarship.logo}
-                            alt={scholarshipTitle}
+                            <Image
+                              src={scholarship.logo}
+                              alt={scholarshipTitle}
                             width={64}
                             height={64}
-                            className="object-contain"
-                            priority={false}
-                          />
+                              className="object-contain"
+                              priority={false}
+                            />
                         ) : (
                           <img
                             src="https://www.CollegeSearch.in/build/assets/default-logo-for-internship-wYvCSDzC.png"
@@ -471,7 +471,7 @@ function ScholarshipsPageContent() {
                       <div className="listing_third_info">
                         <div className="info_and_cta">
                           <Link href={detailsHref}>More Details</Link>
-                        </div>
+                      </div>
                         <div className="info_and_cta">
                           <a
                             href="javascript:void(0)"
@@ -484,7 +484,7 @@ function ScholarshipsPageContent() {
                           >
                             Follow
                           </a>
-                        </div>
+                      </div>
                         <div className="info_and_cta">
                           <a
                             href="javascript:void(0)"
@@ -497,15 +497,15 @@ function ScholarshipsPageContent() {
                           >
                             Apply Now
                           </a>
-                        </div>
+                      </div>
                       </div>
                     </div>
                   );
                 })
               )}
-            </div>
+              </div>
           </div>
-        </div>
+          </div>
       </div>
 
       <FooterLinking />

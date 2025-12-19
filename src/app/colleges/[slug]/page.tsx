@@ -37,6 +37,58 @@ function isValidImageUrl(url: string | undefined): boolean {
 
 const DEFAULT_IMAGE = "/build/assets/t-1709039660-chitkara-university-rajpura.jpeg";
 
+// Helper to derive short course codes like "MBBS", "B.Tech" from full course names
+function getCourseShortForm(courseName: string): string {
+  if (!courseName) return "";
+
+  const name = courseName.trim();
+
+  const shortFormPatterns = [
+    { pattern: /\b(B\.?Tech|B\.?E\.?|Bachelor of Technology|Bachelor of Engineering)\b/i, short: "B.Tech" },
+    { pattern: /\b(M\.?Tech|M\.?E\.?|Master of Technology|Master of Engineering)\b/i, short: "M.Tech" },
+    { pattern: /\b(MBA|Master of Business Administration)\b/i, short: "MBA" },
+    { pattern: /\b(BBA|Bachelor of Business Administration)\b/i, short: "BBA" },
+    { pattern: /\b(BCA|Bachelor of Computer Applications)\b/i, short: "Bachelor of Computer Applications" },
+    { pattern: /\b(MCA|Master of Computer Applications)\b/i, short: "MCA" },
+    { pattern: /\b(MBBS|Bachelor of Medicine.*Bachelor of Surgery)\b/i, short: "MBBS" },
+    { pattern: /\b(B\.?Sc|Bachelor of Science)\b/i, short: "B.Sc" },
+    { pattern: /\b(M\.?Sc|Master of Science)\b/i, short: "M.Sc" },
+    { pattern: /\b(B\.?Com|Bachelor of Commerce)\b/i, short: "B.Com" },
+    { pattern: /\b(M\.?Com|Master of Commerce)\b/i, short: "M.Com" },
+    { pattern: /\b(BA|Bachelor of Arts)\b/i, short: "BA" },
+    { pattern: /\b(MA|Master of Arts)\b/i, short: "MA" },
+    { pattern: /\b(LLB|Bachelor of Laws)\b/i, short: "LLB" },
+    { pattern: /\b(LLM|Master of Laws)\b/i, short: "LLM" },
+    { pattern: /\b(B\.?Pharm|Bachelor of Pharmacy)\b/i, short: "B.Pharm" },
+    { pattern: /\b(M\.?Pharm|Master of Pharmacy)\b/i, short: "M.Pharm" },
+    { pattern: /\b(B\.?Arch|Bachelor of Architecture)\b/i, short: "B.Arch" },
+    { pattern: /\b(M\.?Arch|Master of Architecture)\b/i, short: "M.Arch" },
+    { pattern: /\b(BDS|Bachelor of Dental Surgery)\b/i, short: "BDS" },
+    { pattern: /\b(BHM|Bachelor of Hotel Management)\b/i, short: "BHM" },
+  ];
+
+  for (const { pattern, short } of shortFormPatterns) {
+    if (pattern.test(name)) {
+      return short;
+    }
+  }
+
+  const abbrevMatch = name.match(/\b([A-Z]{2,5})\b/);
+  if (abbrevMatch && abbrevMatch[1].length >= 2 && abbrevMatch[1].length <= 5) {
+    return abbrevMatch[1];
+  }
+
+  const words = name
+    .split(/\s+/)
+    .filter((w) => w && /^[A-Za-z]/.test(w))
+    .map((w) => w[0].toUpperCase());
+  if (words.length >= 2 && words.length <= 5) {
+    return words.join("");
+  }
+
+  return name.length <= 12 ? name : name.slice(0, 12);
+}
+
 // Helper function to check if a string looks like a Firestore ID
 function looksLikeId(identifier: string): boolean {
   // Firestore IDs are typically 20 characters, alphanumeric
@@ -62,6 +114,8 @@ export default function CollegeDetailsPage({ params }: { params: Promise<{ slug:
     currentCourse: "",
   });
   const [registerStatus, setRegisterStatus] = useState("");
+  const currentYear = new Date().getFullYear();
+  const [courseDurations, setCourseDurations] = useState<Record<string, string>>({});
 
   const toggleProgramGroup = (category: string) => {
     setExpandedProgramGroups((prev) => ({
@@ -228,6 +282,38 @@ export default function CollegeDetailsPage({ params }: { params: Promise<{ slug:
       fetchCollegeDetails();
     }
   }, [slug, router]);
+
+  // Load generic course durations (e.g. MBBS = 5.5 Years) from `courses` collection
+  useEffect(() => {
+    const fetchCourseDurations = async () => {
+      if (!college) return;
+      try {
+        const snapshot = await getDocs(collection(db, "courses"));
+        const map: Record<string, string> = {};
+
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data() as any;
+          const courseName = (data.courseName || data.name || "").trim();
+          const duration =
+            (data.duration || data.courseDuration || data.durationText || "").toString().trim();
+          if (!courseName || !duration) return;
+
+          const shortForm = getCourseShortForm(courseName);
+          if (!shortForm) return;
+
+          if (!map[shortForm]) {
+            map[shortForm] = duration;
+          }
+        });
+
+        setCourseDurations(map);
+      } catch (error) {
+        console.error("Error fetching course durations:", error);
+      }
+    };
+
+    fetchCourseDurations();
+  }, [college]);
 
   if (redirecting) {
     return (
@@ -568,12 +654,12 @@ export default function CollegeDetailsPage({ params }: { params: Promise<{ slug:
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid md:grid-cols-3 gap-8 mb-10">
+        <div className="grid md:grid-cols-3 gap-8 mb-10 animate-fade-in-up">
           {/* Left Column - Main Details */}
           <div className="md:col-span-2 space-y-6">
             {/* Overview */}
             {(college.description || college.overview || college.about || college.notes) && (
-              <section className="bg-white p-6 rounded-2xl shadow-sm border">
+              <section className="bg-white p-6 rounded-2xl shadow-sm border animate-fade-in">
                 <h2 className="text-2xl font-semibold mb-4 text-gray-800">Overview</h2>
                 <p className="text-gray-600 leading-relaxed">
                   {college.description || college.overview || college.about || college.notes}
@@ -582,7 +668,7 @@ export default function CollegeDetailsPage({ params }: { params: Promise<{ slug:
             )}
 
             {programEntries.length > 0 && (
-              <section id="courses-fees" className="bg-white p-6 rounded-2xl shadow-sm border space-y-6">
+              <section id="courses-fees" className="bg-white p-6 rounded-2xl shadow-sm border space-y-6 animate-fade-in-up">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div>
                     <p className="text-sm text-gray-500">{programEntries.length} Programs Available</p>
@@ -635,11 +721,17 @@ export default function CollegeDetailsPage({ params }: { params: Promise<{ slug:
                             return (
                               <div
                                 key={`${categoryKey}-${program.id}`}
-                                className="flex flex-col gap-4 px-4 py-4 md:flex-row md:items-center md:justify-between"
+                                className="flex flex-col gap-4 px-4 py-4 md:flex-row md:items-center md:justify-between animate-card-hover"
                               >
                                 <div>
                                   <p className="text-sm text-gray-500">
-                                    {program.duration || "2 Years"}{" "}
+                                    {(() => {
+                                      const key =
+                                        getCourseShortForm(program.name) || program.name || "";
+                                      const fromCourses = key ? courseDurations[key] : undefined;
+                                      const value = fromCourses || program.duration;
+                                      return value ? `${value} ` : "";
+                                    })()}
                                     {program.level ? `• ${program.level}` : ""}
                                   </p>
                                   <h4 className="text-lg font-semibold text-gray-900">
@@ -665,7 +757,7 @@ export default function CollegeDetailsPage({ params }: { params: Promise<{ slug:
                                     onClick={() => openRegisterModal("admission", program.name)}
                                     className="px-4 py-2 rounded-full bg-red-700 text-white font-semibold hover:bg-red-800 transition"
                                   >
-                                    Admission 2025
+                                    {`Admission ${currentYear}`}
                                   </button>
                                   <button
                                     onClick={() => openRegisterModal("brochure", program.name)}
@@ -1256,7 +1348,7 @@ export default function CollegeDetailsPage({ params }: { params: Promise<{ slug:
                 ? "Register to Download Brochure"
                 : registerModal.action === "eligibility"
                 ? "Check Eligibility"
-                : "College Admission 2025"}
+                : `College Admission ${currentYear}`}
             </p>
             <h3 className="mt-1 text-2xl font-semibold text-gray-900">{collegeName}</h3>
             <p className="text-sm text-gray-500">

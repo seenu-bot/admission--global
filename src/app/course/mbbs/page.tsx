@@ -372,9 +372,20 @@ function MbbsExplorerPageContent() {
 
   const countries = useMemo(() => {
     const filtered = colleges.filter((c) => normalize(c.country) !== "india" && c.country);
-    return Array.from(
-      new Set(filtered.map((c) => c.country).filter(Boolean).sort((a, b) => a.localeCompare(b)))
-    );
+
+    // De-duplicate by normalized country name while preserving a nice display label
+    const map = new Map<string, string>();
+    filtered.forEach((c) => {
+      const raw = (c.country || "").trim();
+      if (!raw) return;
+      const key = normalize(raw);
+      if (!key) return;
+      if (!map.has(key)) {
+        map.set(key, raw);
+      }
+    });
+
+    return Array.from(map.values()).sort((a, b) => a.localeCompare(b));
   }, [colleges]);
 
   const filteredColleges = useMemo(() => {
@@ -653,17 +664,17 @@ function MbbsExplorerPageContent() {
                               View College
                             </Link>
                             <div className="flex flex-col items-end text-sm text-gray-600 gap-1">
-                              {rating && (
-                                <div>
-                                  <span className="font-semibold text-gray-900">{rating.toFixed(2)}</span> Rating
-                                </div>
-                              )}
-                              {totalCourses && (
-                                <div>{totalCourses} Courses</div>
-                              )}
-                              {packageFee && (
-                                <div className="text-red-700 font-medium">{packageFee}</div>
-                              )}
+                            {rating && (
+                              <div>
+                                <span className="font-semibold text-gray-900">{rating.toFixed(2)}</span> Rating
+                              </div>
+                            )}
+                            {totalCourses && (
+                              <div>{totalCourses} Courses</div>
+                            )}
+                            {packageFee && (
+                              <div className="text-red-700 font-medium">{packageFee}</div>
+                            )}
                             </div>
                           </div>
                         </div>

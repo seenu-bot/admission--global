@@ -596,7 +596,7 @@ function HomeSearchModal({ isOpen, onClose }: HomeSearchModalProps) {
     return colleges.filter((college) => {
       const searchText = getCollegeSearchText(college);
       return matchesSearch(searchText, searchQuery);
-    }).slice(0, 10); // Limit to 10 results
+    });
   }, [colleges, searchQuery]);
 
   const filteredCourses = useMemo(() => {
@@ -605,7 +605,7 @@ function HomeSearchModal({ isOpen, onClose }: HomeSearchModalProps) {
     return courses.filter((course) => {
       const searchText = getCourseSearchText(course);
       return matchesSearch(searchText, searchQuery);
-    }).slice(0, 10); // Limit to 10 results
+    });
   }, [courses, searchQuery]);
 
   const filteredExams = useMemo(() => {
@@ -614,7 +614,7 @@ function HomeSearchModal({ isOpen, onClose }: HomeSearchModalProps) {
     return exams.filter((exam) => {
       const searchText = getExamSearchText(exam);
       return matchesSearch(searchText, searchQuery);
-    }).slice(0, 10);
+    });
   }, [exams, searchQuery]);
 
   const filteredArticles = useMemo(() => {
@@ -623,7 +623,7 @@ function HomeSearchModal({ isOpen, onClose }: HomeSearchModalProps) {
     return articles.filter((article) => {
       const searchText = getArticleSearchText(article);
       return matchesSearch(searchText, searchQuery);
-    }).slice(0, 10);
+    });
   }, [articles, searchQuery]);
 
   const filteredNews = useMemo(() => {
@@ -632,7 +632,7 @@ function HomeSearchModal({ isOpen, onClose }: HomeSearchModalProps) {
     return news.filter((newsItem) => {
       const searchText = getNewsSearchText(newsItem);
       return matchesSearch(searchText, searchQuery);
-    }).slice(0, 10);
+    });
   }, [news, searchQuery]);
 
   const filteredScholarships = useMemo(() => {
@@ -641,7 +641,7 @@ function HomeSearchModal({ isOpen, onClose }: HomeSearchModalProps) {
     return scholarships.filter((scholarship) => {
       const searchText = getScholarshipSearchText(scholarship);
       return matchesSearch(searchText, searchQuery);
-    }).slice(0, 10);
+    });
   }, [scholarships, searchQuery]);
 
   const filteredJobs = useMemo(() => {
@@ -650,7 +650,7 @@ function HomeSearchModal({ isOpen, onClose }: HomeSearchModalProps) {
     return jobs.filter((job) => {
       const searchText = getJobSearchText(job);
       return matchesSearch(searchText, searchQuery);
-    }).slice(0, 10);
+    });
   }, [jobs, searchQuery]);
 
   const filteredInternships = useMemo(() => {
@@ -659,7 +659,7 @@ function HomeSearchModal({ isOpen, onClose }: HomeSearchModalProps) {
     return internships.filter((internship) => {
       const searchText = getInternshipSearchText(internship);
       return matchesSearch(searchText, searchQuery);
-    }).slice(0, 10);
+    });
   }, [internships, searchQuery]);
 
   // Reset search when modal closes
@@ -808,20 +808,25 @@ function HomeSearchModal({ isOpen, onClose }: HomeSearchModalProps) {
                           Courses ({filteredCourses.length})
                         </h3>
                         <div className="space-y-2">
-                          {filteredCourses.map((course) => {
-                            const courseSlug = getCourseSlug(course) || course.id;
+                          {filteredCourses.map((course, index) => {
+                            const courseSlug = getCourseSlug(course) || course.id || `course-${index}`;
+                            const key = course.id ? `${course.id}-${index}` : `${courseSlug}-${index}`;
                             return (
-                            <Link
-                              key={course.id}
+                              <Link
+                                key={key}
                                 href={`/course/${courseSlug}`}
-                              className="block p-4 border border-gray-200 rounded-lg hover:border-orange-500 hover:bg-orange-50 transition-all"
-                              onClick={onClose}
-                            >
-                              <div className="font-semibold text-gray-900">{course.courseName}</div>
-                              {course.shortForm && (
-                                <div className="text-sm text-gray-600 mt-1">{course.shortForm}</div>
-                              )}
-                            </Link>
+                                className="block p-4 border border-gray-200 rounded-lg hover:border-orange-500 hover:bg-orange-50 transition-all"
+                                onClick={onClose}
+                              >
+                                <div className="font-semibold text-gray-900">
+                                  {course.courseName}
+                                </div>
+                                {course.shortForm && (
+                                  <div className="text-sm text-gray-600 mt-1">
+                                    {course.shortForm}
+                                  </div>
+                                )}
+                              </Link>
                             );
                           })}
                         </div>

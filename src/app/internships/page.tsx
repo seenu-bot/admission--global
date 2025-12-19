@@ -286,7 +286,7 @@ function InternshipsPageContent() {
                     </option>
                   ))}
                 </select>
-              </div>
+                    </div>
 
               {/* Location Filter */}
               <div className="listing_filter_div">
@@ -323,12 +323,12 @@ function InternshipsPageContent() {
                                     />
                                     <span>{loc}</span>
                                   </label>
-                                </div>
+                  </div>
                               ))}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                  </div>
+                  </div>
+                  </div>
+                  </div>
                     )}
                   </div>
                 </div>
@@ -349,8 +349,8 @@ function InternshipsPageContent() {
                         />
                         <span>{type.toUpperCase()}</span>
                       </label>
-                    </div>
-                  ))}
+                </div>
+              ))}
                 </div>
               </div>
             </div>
@@ -398,8 +398,8 @@ function InternshipsPageContent() {
               ) : filteredInternships.length === 0 ? (
                 <div className="listing_data_card" style={{ textAlign: "center", padding: "40px" }}>
                   <p className="text-gray-600">No internships found matching your criteria.</p>
-                </div>
-              ) : (
+            </div>
+          ) : (
                 filteredInternships.map((internship) => {
                   const internshipTitle = internship.title || internship.name || "Internship";
                   const organization = internship.company || internship.organization || "—";
@@ -419,14 +419,14 @@ function InternshipsPageContent() {
                           <strong className="shortform">{organization}</strong>
                         </div>
                         {internship.logo ? (
-                          <Image
-                            src={internship.logo}
-                            alt={internshipTitle}
+                            <Image
+                              src={internship.logo}
+                              alt={internshipTitle}
                             width={64}
                             height={64}
-                            className="object-contain"
-                            priority={false}
-                          />
+                              className="object-contain"
+                              priority={false}
+                            />
                         ) : (
                           <img
                             src="https://www.CollegeSearch.in/build/assets/default-logo-for-internship-wYvCSDzC.png"
@@ -502,9 +502,9 @@ function InternshipsPageContent() {
                   );
                 })
               )}
-            </div>
+              </div>
           </div>
-        </div>
+          </div>
       </div>
 
       <FooterLinking />

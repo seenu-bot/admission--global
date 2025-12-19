@@ -382,13 +382,13 @@ function JobsPageContent() {
                                 </div>
                               ))}
                             </div>
-                          </div>
-                        </div>
-                      </div>
+                    </div>
+                  </div>
+                  </div>
                     )}
                   </div>
-                </div>
-              </div>
+                  </div>
+                  </div>
 
               {/* Working Hours Filter */}
               <div className="listing_filter_div">
@@ -463,8 +463,8 @@ function JobsPageContent() {
               ) : filteredJobs.length === 0 ? (
                 <div className="listing_data_card" style={{ textAlign: "center", padding: "40px" }}>
                   <p className="text-gray-600">No jobs found matching your criteria.</p>
-                </div>
-              ) : (
+            </div>
+          ) : (
                 filteredJobs.map((job) => {
                   const jobTitle = job.title || job.name || job.position || "Job";
                   const organization = job.company || job.organization || "—";
@@ -483,14 +483,14 @@ function JobsPageContent() {
                           <strong className="shortform">{organization}</strong>
                         </div>
                         {job.logo ? (
-                          <Image
-                            src={job.logo}
-                            alt={jobTitle}
+                            <Image
+                              src={job.logo}
+                              alt={jobTitle}
                             width={64}
                             height={64}
-                            className="object-contain"
-                            priority={false}
-                          />
+                              className="object-contain"
+                              priority={false}
+                            />
                         ) : (
                           <img
                             src="https://www.CollegeSearch.in/build/assets/default-logo-for-internship-wYvCSDzC.png"
@@ -520,8 +520,8 @@ function JobsPageContent() {
                           <div>
                             <span>Experience</span>
                             <p>{experience}</p>
-                          </div>
                         </div>
+                      </div>
 
                         <div className="info_and_cta">
                           <div>
@@ -566,9 +566,9 @@ function JobsPageContent() {
                   );
                 })
               )}
-            </div>
+              </div>
           </div>
-        </div>
+          </div>
       </div>
 
       <FooterLinking />

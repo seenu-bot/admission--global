@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'AdmissionGlobal - Discover and Find the Best Right College',
-    description: 'Find the perfect college for your future. Search through thousands of colleges and courses across India.',
+  description: 'Find the perfect college for your future. Search through thousands of colleges and courses across India.',
     images: ['/og-image.jpg'],
   },
   robots: {

@@ -684,7 +684,7 @@ export default function Header() {
       collegesQ,
       (snap) => {
         const cities = new Set<string>();
-        const countries = new Set<string>();
+        const countriesMap = new Map<string, string>();
         const paramedicalCitiesSet = new Set<string>();
         const paramedicalCollegesMap = new Map<string, { id: string; name: string; city?: string }>();
         snap.forEach((doc) => {
@@ -692,10 +692,13 @@ export default function Header() {
           if (isMbbsCollege(d)) {
             const city = d.city || d.cityName || d?.location?.city || d?.address?.city;
             const country = d.country || d.countryName || d?.location?.country || d?.address?.country;
-            if (normalize(country) === 'india') {
+            const normCountry = country ? normalize(String(country)) : '';
+            if (normCountry === 'india') {
               if (city) cities.add(String(city));
-            } else if (country) {
-              countries.add(String(country));
+            } else if (normCountry) {
+              if (!countriesMap.has(normCountry)) {
+                countriesMap.set(normCountry, String(country));
+              }
             }
           }
           if (isMbaCollegeDoc(d)) {
@@ -831,7 +834,9 @@ export default function Header() {
           }
         });
         setMbbsCities(Array.from(cities).sort((a, b) => a.localeCompare(b)));
-        setMbbsCountries(Array.from(countries).sort((a, b) => a.localeCompare(b)));
+        setMbbsCountries(
+          Array.from(countriesMap.values()).sort((a, b) => a.localeCompare(b))
+        );
         updateMbaStates();
         updateBbaStates();
         updateMtechStates();
